@@ -1,0 +1,9 @@
+{
+  "name": "Example Form",
+  "sections": [
+    { "id": "header", "title": "Header", "order": 0 }
+  ],
+  "fields": [
+    { "id": "full-name", "label": "Full Name", "type": "text", "required": true, "sectionId": "header" }
+  ]
+}
