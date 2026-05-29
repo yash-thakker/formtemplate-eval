@@ -1,7 +1,7 @@
 import type { MatchResult } from './match-fields.js';
 
-export function meanLabelSimilarity(match: MatchResult): number {
+/** Mean similarity of matched `questionValue` pairs. */
+export function meanQuestionSimilarity(match: MatchResult): number {
   if (match.matched.length === 0) return 0;
-  const sum = match.matched.reduce((acc, m) => acc + m.similarity, 0);
-  return sum / match.matched.length;
+  return match.matched.reduce((acc, m) => acc + m.similarity, 0) / match.matched.length;
 }

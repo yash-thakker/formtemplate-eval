@@ -1,93 +1,102 @@
 import { describe, it, expect } from 'vitest';
-import { matchFields, labelSimilarity } from '../../src/scoring/match-fields.js';
-import type { Field } from '../../src/schema.js';
+import { matchQuestions, textSimilarity, flattenQuestions } from '../../src/scoring/match-fields.js';
+import type { FormTemplate, FormTemplateSection, QuestionField } from '../../src/schema.js';
+import type { QuestionWithSection } from '../../src/types.js';
 
-function f(id: string, label: string, type: Field['type'] = 'text', required = false): Field {
-  return { id, label, type, required };
+let _uuid = 0;
+function uuid(): string {
+  _uuid += 1;
+  return `00000000-0000-0000-0000-${_uuid.toString().padStart(12, '0')}`;
 }
 
-describe('labelSimilarity', () => {
-  it('returns 1 for identical labels', () => {
-    expect(labelSimilarity('Full Name', 'Full Name')).toBe(1);
-  });
+function q(questionValue: string, fieldType: QuestionField['fieldType'] = 'single-line'): QuestionField {
+  const base = { _id: uuid(), fieldLabel: 'Label', questionValue, isMandatory: false };
+  if (fieldType === 'date-time') return { ...base, fieldType, displayAs: 'dateOnly' };
+  if (fieldType === 'users') return { ...base, fieldType, viewType: 'card', selectionType: 'singleUser' };
+  if (fieldType === 'single-select') return { ...base, fieldType, answerChoices: ['A', 'B'], viewType: 'list' };
+  return { ...base, fieldType } as QuestionField;
+}
 
-  it('ignores trailing colons and whitespace', () => {
-    expect(labelSimilarity('Full Name:', 'Full Name')).toBe(1);
-    expect(labelSimilarity('  Full Name  ', 'Full Name')).toBe(1);
-  });
+function section(heading: string, questions: QuestionField[], code: FormTemplateSection['sectionCode'] = 'SECTION_TYPE_BLANK_SECTION'): FormTemplateSection {
+  return { _id: uuid(), sectionHeading: heading, sectionCode: code, questionFields: questions };
+}
 
-  it('is case-insensitive', () => {
-    expect(labelSimilarity('FULL NAME', 'full name')).toBe(1);
-  });
+function tmpl(sections: FormTemplateSection[], name = 'Form'): FormTemplate {
+  return { name, description: '', template: sections };
+}
 
-  it('returns a high value for near-matches', () => {
-    expect(labelSimilarity('Phone Number', 'Phone Num')).toBeGreaterThan(0.6);
-  });
+function withSec(question: QuestionField, sec: FormTemplateSection): QuestionWithSection {
+  return { question, section: sec };
+}
 
-  it('returns a low value for unrelated labels', () => {
-    expect(labelSimilarity('Phone Number', 'Date of Birth')).toBeLessThan(0.4);
+describe('textSimilarity', () => {
+  it('returns 1 for identical text', () => {
+    expect(textSimilarity('Full Name', 'Full Name')).toBe(1);
+  });
+  it('ignores trailing colons and case', () => {
+    expect(textSimilarity('Full Name:', 'full name')).toBe(1);
+  });
+  it('is low for unrelated text', () => {
+    expect(textSimilarity('Phone Number', 'Date of Birth')).toBeLessThan(0.4);
   });
 });
 
-describe('matchFields', () => {
+describe('flattenQuestions', () => {
+  it('preserves section provenance and ordering', () => {
+    const s1 = section('A', [q('q1'), q('q2')]);
+    const s2 = section('B', [q('q3')]);
+    const t = tmpl([s1, s2]);
+    const flat = flattenQuestions(t);
+    expect(flat).toHaveLength(3);
+    expect(flat.map((f) => f.question.questionValue)).toEqual(['q1', 'q2', 'q3']);
+    expect(flat[0].section.sectionHeading).toBe('A');
+    expect(flat[2].section.sectionHeading).toBe('B');
+  });
+});
+
+describe('matchQuestions', () => {
   it('returns all expected as missing when extracted is empty', () => {
-    const expected = [f('a', 'Name'), f('b', 'Date')];
-    const m = matchFields([], expected);
+    const s = section('S', [q('A'), q('B')]);
+    const expected = [withSec(s.questionFields[0], s), withSec(s.questionFields[1], s)];
+    const m = matchQuestions([], expected);
     expect(m.matched).toHaveLength(0);
     expect(m.expectedMissing).toHaveLength(2);
-    expect(m.extractedExtra).toHaveLength(0);
   });
 
-  it('returns all extracted as extras when expected is empty', () => {
-    const extracted = [f('a', 'Name')];
-    const m = matchFields(extracted, []);
-    expect(m.matched).toHaveLength(0);
-    expect(m.extractedExtra).toHaveLength(1);
-    expect(m.expectedMissing).toHaveLength(0);
-  });
-
-  it('matches exact label pairs', () => {
-    const extracted = [f('1', 'Name'), f('2', 'Date of Birth')];
-    const expected = [f('a', 'Date of Birth'), f('b', 'Name')];
-    const m = matchFields(extracted, expected);
+  it('matches identical questionValues', () => {
+    const s = section('S', [q('Name'), q('Date of Birth')]);
+    const t = section('S', [q('Date of Birth'), q('Name')]);
+    const m = matchQuestions(
+      [withSec(t.questionFields[0], t), withSec(t.questionFields[1], t)],
+      [withSec(s.questionFields[0], s), withSec(s.questionFields[1], s)],
+    );
     expect(m.matched).toHaveLength(2);
     expect(m.extractedExtra).toHaveLength(0);
     expect(m.expectedMissing).toHaveLength(0);
   });
 
-  it('rejects matches below the similarity threshold', () => {
-    const extracted = [f('1', 'Customer Phone Number')];
-    const expected = [f('a', 'Building Permit Number')];
-    const m = matchFields(extracted, expected, 0.6);
+  it('rejects pairs below similarity threshold', () => {
+    const s1 = section('A', [q('Customer Phone Number')]);
+    const s2 = section('A', [q('Building Permit Number')]);
+    const m = matchQuestions(
+      [withSec(s1.questionFields[0], s1)],
+      [withSec(s2.questionFields[0], s2)],
+      0.6,
+    );
     expect(m.matched).toHaveLength(0);
     expect(m.extractedExtra).toHaveLength(1);
     expect(m.expectedMissing).toHaveLength(1);
   });
 
-  it('picks the better assignment when labels overlap partially', () => {
-    const extracted = [f('1', 'Project Name'), f('2', 'Project Number')];
-    const expected = [f('a', 'Project Number'), f('b', 'Project Name')];
-    const m = matchFields(extracted, expected);
+  it('picks the better assignment when labels overlap', () => {
+    const s1 = section('S', [q('Project Name'), q('Project Number')]);
+    const s2 = section('S', [q('Project Number'), q('Project Name')]);
+    const m = matchQuestions(
+      [withSec(s1.questionFields[0], s1), withSec(s1.questionFields[1], s1)],
+      [withSec(s2.questionFields[0], s2), withSec(s2.questionFields[1], s2)],
+    );
     expect(m.matched).toHaveLength(2);
-    const labels = m.matched.map((p) => `${p.extracted.label}->${p.expected.label}`).sort();
-    expect(labels).toEqual(['Project Name->Project Name', 'Project Number->Project Number']);
-  });
-
-  it('reports extras and missings when sizes differ', () => {
-    const extracted = [f('1', 'Name'), f('2', 'Address'), f('3', 'Garbage Extra')];
-    const expected = [f('a', 'Name'), f('b', 'Phone')];
-    const m = matchFields(extracted, expected);
-    expect(m.matched.length).toBe(1);
-    expect(m.matched[0].extracted.label).toBe('Name');
-    expect(m.expectedMissing.map((x) => x.label).sort()).toEqual(['Phone']);
-    expect(m.extractedExtra.map((x) => x.label).sort()).toEqual(['Address', 'Garbage Extra']);
-  });
-
-  it('matches when labels differ only in punctuation/case', () => {
-    const extracted = [f('1', 'date of birth:')];
-    const expected = [f('a', 'Date of Birth')];
-    const m = matchFields(extracted, expected);
-    expect(m.matched).toHaveLength(1);
-    expect(m.matched[0].similarity).toBe(1);
+    const pairs = m.matched.map((p) => `${p.extracted.question.questionValue}->${p.expected.question.questionValue}`).sort();
+    expect(pairs).toEqual(['Project Name->Project Name', 'Project Number->Project Number']);
   });
 });

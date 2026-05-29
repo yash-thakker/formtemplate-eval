@@ -87,16 +87,16 @@ export function renderMarkdownReport(report: BenchmarkReport): string {
       if (r.scores) {
         if (r.scores.unmatched.expectedMissing.length) {
           out.push('');
-          out.push('Missing fields (in expected, not extracted):');
-          for (const f of r.scores.unmatched.expectedMissing) {
-            out.push(`- ${f.label} (${f.type})`);
+          out.push('Missing questions (in expected, not extracted):');
+          for (const qs of r.scores.unmatched.expectedMissing) {
+            out.push(`- "${qs.question.questionValue}" (${qs.question.fieldType}) in section "${qs.section.sectionHeading}"`);
           }
         }
         if (r.scores.unmatched.extractedExtra.length) {
           out.push('');
-          out.push('Extra fields (extracted but not in expected):');
-          for (const f of r.scores.unmatched.extractedExtra) {
-            out.push(`- ${f.label} (${f.type})`);
+          out.push('Extra questions (extracted but not in expected):');
+          for (const qs of r.scores.unmatched.extractedExtra) {
+            out.push(`- "${qs.question.questionValue}" (${qs.question.fieldType}) in section "${qs.section.sectionHeading}"`);
           }
         }
       }

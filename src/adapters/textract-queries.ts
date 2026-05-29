@@ -1,25 +1,21 @@
+import { randomUUID } from 'node:crypto';
 import type { ExtractionAdapter, FixtureMeta, AdapterResult } from '../types.js';
-import type { Field } from '../schema.js';
-import { ExtractedTemplateSchema } from '../schema.js';
+import type { QuestionField } from '../schema.js';
+import { FormTemplateSchema } from '../schema.js';
 import { analyzeDocument } from '../ocr/textract.js';
 import { ocrCost } from '../config.js';
 import { buildResult } from './base.js';
 
-function slugify(s: string): string {
-  return s
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .trim()
-    .replace(/\s+/g, '-')
-    .slice(0, 60);
-}
-
 /**
  * Textract Queries adapter — requires `queries` in the fixture meta.json.
  *
- * Each query becomes a candidate field whose label is the query text. Query
- * answers populate `hint` so downstream consumers can see what Textract found
- * (the eval itself only scores the schema-shaped output).
+ * Each query becomes a `single-line` question whose `questionValue` is the
+ * query text. The answer Textract found is stored in `fieldInstruction`
+ * so it's visible in the raw output (the eval only scores the schema-shaped
+ * fields, not the answers).
+ *
+ * Every query becomes one section so that flattened matching still has
+ * section provenance.
  */
 export const textractQueriesAdapter: ExtractionAdapter = {
   name: 'textract-queries',
@@ -38,29 +34,39 @@ export const textractQueriesAdapter: ExtractionAdapter = {
       const queries = meta.queries.map((q) => ({ Alias: q.alias, Text: q.text }));
       const { blocks, pages } = await analyzeDocument(pdfPath, ['QUERIES'], queries);
 
-      // Map QUERY blocks to fields.
-      const fields: Field[] = [];
-      const usedIds = new Set<string>();
+      const questionFields: QuestionField[] = [];
       for (const b of blocks) {
         if (b.BlockType !== 'QUERY' || !b.Query) continue;
-        const label = b.Query.Text ?? b.Query.Alias ?? 'query';
-        const baseId = slugify(b.Query.Alias ?? label) || 'field';
-        let id = baseId;
-        let n = 1;
-        while (usedIds.has(id)) id = `${baseId}-${n++}`;
-        usedIds.add(id);
-        // Find linked QUERY_RESULT for the hint.
+        const questionValue = b.Query.Text ?? b.Query.Alias ?? 'query';
         let answer: string | undefined;
         for (const rel of b.Relationships ?? []) {
           if (rel.Type !== 'ANSWER' || !rel.Ids) continue;
           const ans = blocks.find((x) => x.Id === rel.Ids![0] && x.BlockType === 'QUERY_RESULT');
           if (ans?.Text) answer = ans.Text;
         }
-        fields.push({ id, label, type: 'text', required: false, hint: answer });
+        questionFields.push({
+          _id: randomUUID(),
+          fieldType: 'single-line',
+          fieldLabel: 'Label',
+          questionValue,
+          isMandatory: false,
+          fieldInstruction: answer,
+        });
       }
 
-      const template = { name: 'Untitled Form', sections: [], fields };
-      const parsed = ExtractedTemplateSchema.safeParse(template);
+      const template = {
+        name: 'Untitled Form',
+        description: '',
+        template: [
+          {
+            _id: randomUUID(),
+            sectionHeading: 'Queries',
+            sectionCode: 'SECTION_TYPE_BLANK_SECTION' as const,
+            questionFields,
+          },
+        ],
+      };
+      const parsed = FormTemplateSchema.safeParse(template);
       const latencyMs = performance.now() - start;
       const costUsd = ocrCost('textract-queries', pages);
       return buildResult(blocks, parsed, { latencyMs, costUsd, ocrPages: pages });

@@ -1,79 +1,94 @@
+import { randomUUID } from 'node:crypto';
 import type { ExtractionAdapter, FixtureMeta, AdapterResult } from '../types.js';
-import type { Field, FieldType, Section } from '../schema.js';
-import { ExtractedTemplateSchema } from '../schema.js';
+import type { FieldType, FormTemplate, FormTemplateSection, QuestionField } from '../schema.js';
+import { FormTemplateSchema } from '../schema.js';
 import { digitiseDocument } from '../ocr/sarvam.js';
 import { ocrCost } from '../config.js';
 import { buildResult } from './base.js';
 
-function slugify(s: string): string {
-  return s.toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-').slice(0, 60);
-}
-
 function inferType(label: string): FieldType {
   const l = label.toLowerCase();
-  if (/(date|dob|birth)/.test(l)) return 'date';
-  if (/(no\.?|number|qty|quantity|amount|total|count)/.test(l)) return 'number';
-  return 'text';
+  if (/\b(signature|signed|sign here|signee)\b/.test(l)) return 'users';
+  if (/(date|dob|birth)/.test(l)) return 'date-time';
+  if (/(no\.?|number|qty|quantity|amount|total|count|#)/.test(l)) return 'number';
+  if (/(describe|description|notes|comments|details|remarks|explain)/.test(l)) return 'multi-line';
+  if (/(url|website|link)/.test(l)) return 'url';
+  return 'single-line';
+}
+
+function buildQuestion(questionValue: string, fieldType: FieldType): QuestionField {
+  const base = { _id: randomUUID(), fieldLabel: 'Label', questionValue, isMandatory: false };
+  switch (fieldType) {
+    case 'single-select':
+    case 'multi-select':
+      return { ...base, fieldType, answerChoices: ['Yes', 'No'], viewType: 'list' };
+    case 'date-time':
+      return { ...base, fieldType, displayAs: 'dateOnly' };
+    case 'users':
+      return { ...base, fieldType, viewType: 'card', selectionType: 'singleUser' };
+    case 'look-up':
+      return { ...base, fieldType, lookUpAnsFieldType: 'Location' };
+    case 'single-line':
+    case 'multi-line':
+    case 'number':
+    case 'fileUpload':
+    case 'image':
+    case 'geoLocation':
+    case 'url':
+      return { ...base, fieldType };
+  }
 }
 
 /**
- * Very small heuristic parser: scan Sarvam's markdown output for headers
- * and field-shaped lines (lines ending with a colon or with a blank/`____`).
- * This is a baseline — the +LLM variant is expected to do far better.
+ * Very small heuristic markdown parser: recognises headers (`#`-prefixed),
+ * checkbox-shaped lines, and label-shaped lines like "Name: _____".
+ *
+ * Every header opens a new SECTION_TYPE_BLANK_SECTION. Sarvam markdown
+ * doesn't tell us about table sections directly, so this baseline never
+ * emits SECTION_TYPE_TABLE_SECTION — the +LLM variant is expected to.
  */
-function markdownToTemplate(markdown: string, name = 'Untitled Form') {
-  const sections: Section[] = [];
-  const fields: Field[] = [];
-  const usedFieldIds = new Set<string>();
-  const usedSectionIds = new Set<string>();
-  let currentSectionId: string | undefined;
-  let order = 0;
+function markdownToTemplate(markdown: string, name = 'Untitled Form'): FormTemplate {
+  const sections: FormTemplateSection[] = [];
+  let current: FormTemplateSection = {
+    _id: randomUUID(),
+    sectionHeading: 'Header',
+    sectionCode: 'SECTION_TYPE_BLANK_SECTION',
+    questionFields: [],
+  };
+  sections.push(current);
 
   const lines = markdown.split('\n').map((l) => l.trim()).filter(Boolean);
   for (const line of lines) {
     const headerMatch = /^#+\s+(.+)$/.exec(line);
     if (headerMatch) {
-      const title = headerMatch[1].trim();
-      let id = slugify(title) || 'section';
-      let n = 1;
-      while (usedSectionIds.has(id)) id = `${slugify(title)}-${n++}`;
-      usedSectionIds.add(id);
-      sections.push({ id, title, order: order++ });
-      currentSectionId = id;
+      current = {
+        _id: randomUUID(),
+        sectionHeading: headerMatch[1].trim(),
+        sectionCode: 'SECTION_TYPE_BLANK_SECTION',
+        questionFields: [],
+      };
+      sections.push(current);
       continue;
     }
 
-    // checkbox-shaped: "[ ] Some option" or "- [ ] Some option"
     const checkboxMatch = /^(?:[-*]\s+)?\[[ x]\]\s+(.+)$/i.exec(line);
     if (checkboxMatch) {
-      const label = checkboxMatch[1].trim();
-      let id = slugify(label) || 'field';
-      let n = 1;
-      while (usedFieldIds.has(id)) id = `${slugify(label)}-${n++}`;
-      usedFieldIds.add(id);
-      fields.push({ id, label, type: 'checkbox', required: false, sectionId: currentSectionId });
+      current.questionFields.push(buildQuestion(checkboxMatch[1].trim(), 'single-select'));
       continue;
     }
 
-    // field-shaped: "Label:" or "Label: ____" or "Label _____"
     const labelMatch = /^([A-Za-z][^:_]{1,60})\s*[:_]+\s*_*$/.exec(line);
     if (labelMatch) {
       const label = labelMatch[1].trim();
-      let id = slugify(label) || 'field';
-      let n = 1;
-      while (usedFieldIds.has(id)) id = `${slugify(label)}-${n++}`;
-      usedFieldIds.add(id);
-      fields.push({
-        id,
-        label,
-        type: inferType(label),
-        required: false,
-        sectionId: currentSectionId,
-      });
+      current.questionFields.push(buildQuestion(label, inferType(label)));
     }
   }
 
-  return { name, sections, fields };
+  return {
+    name,
+    description: '',
+    template: sections.filter((s, i) => !(i === 0 && s.questionFields.length === 0)),
+  };
 }
 
 export const sarvamOnlyAdapter: ExtractionAdapter = {
@@ -84,7 +99,7 @@ export const sarvamOnlyAdapter: ExtractionAdapter = {
     try {
       const { markdown, pages } = await digitiseDocument(pdfPath, meta.language);
       const template = markdownToTemplate(markdown, meta.name);
-      const parsed = ExtractedTemplateSchema.safeParse(template);
+      const parsed = FormTemplateSchema.safeParse(template);
       const latencyMs = performance.now() - start;
       const costUsd = ocrCost('sarvam-doc-intel', pages);
       return buildResult(markdown, parsed, { latencyMs, costUsd, ocrPages: pages });

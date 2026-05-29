@@ -1,5 +1,5 @@
 import type { ExtractionAdapter, FixtureMeta, AdapterResult } from '../types.js';
-import { ExtractedTemplateSchema } from '../schema.js';
+import { FormTemplateSchema } from '../schema.js';
 import { analyzeDocument } from '../ocr/textract.js';
 import { blocksToTemplate } from './textract-mapper.js';
 import { ocrCost } from '../config.js';
@@ -13,7 +13,7 @@ export const textractOnlyAdapter: ExtractionAdapter = {
     try {
       const { blocks, pages } = await analyzeDocument(pdfPath, ['FORMS', 'TABLES', 'LAYOUT', 'SIGNATURES']);
       const template = blocksToTemplate(blocks);
-      const parsed = ExtractedTemplateSchema.safeParse(template);
+      const parsed = FormTemplateSchema.safeParse(template);
       const latencyMs = performance.now() - start;
       const costUsd =
         ocrCost('textract-forms', pages) +

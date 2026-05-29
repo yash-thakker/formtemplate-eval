@@ -1,35 +1,24 @@
-import type { ExtractedTemplate, Section } from '../schema.js';
-import { labelSimilarity } from './match-fields.js';
+import { textSimilarity } from './match-fields.js';
 import type { MatchResult } from './match-fields.js';
 
-const SECTION_MATCH_THRESHOLD = 0.7;
-
-function titleFor(template: ExtractedTemplate, sectionId: string | undefined): string | undefined {
-  if (!sectionId) return undefined;
-  const sec: Section | undefined = template.sections.find((s) => s.id === sectionId);
-  return sec?.title;
-}
+const SECTION_HEADING_THRESHOLD = 0.7;
 
 /**
- * For each matched field pair, both sides must either share an unset section
- * or have sections whose titles fuzzy-match (>= SECTION_MATCH_THRESHOLD).
+ * For each matched question pair, the pair "shares a section" iff:
+ *   - sectionHeading similarity >= 0.7, AND
+ *   - sectionCode is identical (BLANK vs TABLE).
+ *
+ * Both must hold — section structure matters for downstream consumers.
  */
-export function sectionAccuracy(
-  match: MatchResult,
-  extractedTemplate: ExtractedTemplate,
-  expectedTemplate: ExtractedTemplate,
-): number {
+export function sectionAccuracy(match: MatchResult): number {
   if (match.matched.length === 0) return 0;
   let hits = 0;
   for (const m of match.matched) {
-    const extractedTitle = titleFor(extractedTemplate, m.extracted.sectionId);
-    const expectedTitle = titleFor(expectedTemplate, m.expected.sectionId);
-    if (!extractedTitle && !expectedTitle) {
-      hits += 1;
-      continue;
-    }
-    if (!extractedTitle || !expectedTitle) continue;
-    if (labelSimilarity(extractedTitle, expectedTitle) >= SECTION_MATCH_THRESHOLD) hits += 1;
+    const exSec = m.extracted.section;
+    const expSec = m.expected.section;
+    if (exSec.sectionCode !== expSec.sectionCode) continue;
+    if (textSimilarity(exSec.sectionHeading, expSec.sectionHeading) < SECTION_HEADING_THRESHOLD) continue;
+    hits += 1;
   }
   return hits / match.matched.length;
 }

@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { generateObject } from 'ai';
 import type { CoreUserMessage, LanguageModel } from 'ai';
-import { ExtractedTemplateSchema } from '../schema.js';
+import { FormTemplateSchema } from '../schema.js';
 import type { AdapterResult, FixtureMeta } from '../types.js';
 import { llmCost } from '../config.js';
 import { logger } from '../utils/logger.js';
@@ -35,7 +35,7 @@ export async function runLLMExtraction(args: RunLLMArgs, _meta: FixtureMeta): Pr
 
     const response = await generateObject({
       model: args.model,
-      schema: ExtractedTemplateSchema,
+      schema: FormTemplateSchema,
       maxRetries: 2,
       system: TEMPLATE_EXTRACTION_SYSTEM,
       messages: [userMessage],

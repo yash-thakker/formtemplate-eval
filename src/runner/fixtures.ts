@@ -1,7 +1,7 @@
 import { readdir, readFile, stat } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ExtractedTemplateSchema } from '../schema.js';
+import { FormTemplateSchema } from '../schema.js';
 import { z } from 'zod';
 import type { Fixture, FixtureMeta } from '../types.js';
 
@@ -46,7 +46,7 @@ export async function loadFixture(dir: string): Promise<Fixture | null> {
     ? MetaSchema.parse(JSON.parse(await readFile(metaPath, 'utf8')))
     : { id: dir.split('/').pop() ?? 'unknown', name: 'Unknown' };
 
-  const expected = ExtractedTemplateSchema.parse(JSON.parse(await readFile(expectedPath, 'utf8')));
+  const expected = FormTemplateSchema.parse(JSON.parse(await readFile(expectedPath, 'utf8')));
   return { meta, pdfPath, expected };
 }
 

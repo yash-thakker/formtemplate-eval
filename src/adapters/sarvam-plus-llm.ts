@@ -1,7 +1,7 @@
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { generateObject } from 'ai';
 import type { ExtractionAdapter, FixtureMeta, AdapterResult } from '../types.js';
-import { ExtractedTemplateSchema } from '../schema.js';
+import { FormTemplateSchema } from '../schema.js';
 import { digitiseDocument } from '../ocr/sarvam.js';
 import { getEnv, llmCost, ocrCost } from '../config.js';
 import { TEMPLATE_EXTRACTION_SYSTEM, TEMPLATE_FROM_OCR_USER } from '../prompts/template-extraction.js';
@@ -27,7 +27,7 @@ export const sarvamPlusLlmAdapter: ExtractionAdapter = {
       const google = createGoogleGenerativeAI({ apiKey: env.GOOGLE_GENERATIVE_AI_API_KEY });
       const response = await generateObject({
         model: google('gemini-2.5-flash'),
-        schema: ExtractedTemplateSchema,
+        schema: FormTemplateSchema,
         maxRetries: 2,
         system: TEMPLATE_EXTRACTION_SYSTEM,
         prompt: `${TEMPLATE_FROM_OCR_USER}${markdown}`,
@@ -39,7 +39,7 @@ export const sarvamPlusLlmAdapter: ExtractionAdapter = {
       const costUsd =
         ocrCost('sarvam-doc-intel', pages) + llmCost('gemini-2.5-flash', inputTokens, outputTokens);
 
-      const parsed = ExtractedTemplateSchema.safeParse(response.object);
+      const parsed = FormTemplateSchema.safeParse(response.object);
       return buildResult(response.object, parsed, {
         latencyMs,
         costUsd,

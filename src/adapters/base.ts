@@ -1,7 +1,7 @@
 import { readFile, writeFile, mkdir, access } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ExtractedTemplateSchema } from '../schema.js';
+import { FormTemplateSchema } from '../schema.js';
 import type { ExtractionAdapter, AdapterResult, FixtureMeta } from '../types.js';
 import { hashFile } from '../utils/hash.js';
 import { logger } from '../utils/logger.js';
@@ -69,7 +69,7 @@ export interface RunAdapterOptions {
  *
  * Adapters themselves must:
  *   - Never throw — catch and return { error } in AdapterResult.
- *   - Validate their own output against ExtractedTemplateSchema and set
+ *   - Validate their own output against FormTemplateSchema and set
  *     result: null on validation failure.
  *
  * This wrapper re-checks the schema as a safety net and enforces the timeout.
@@ -108,7 +108,7 @@ export async function runAdapter(
   // Safety net schema validation — adapters should already do this, but
   // double-check before returning so a buggy adapter can't poison scoring.
   if (result.result) {
-    const parsed = ExtractedTemplateSchema.safeParse(result.result);
+    const parsed = FormTemplateSchema.safeParse(result.result);
     if (!parsed.success) {
       result = {
         ...result,
@@ -132,7 +132,7 @@ export async function runAdapter(
  */
 export function buildResult(
   raw: unknown,
-  parsed: ReturnType<typeof ExtractedTemplateSchema.safeParse>,
+  parsed: ReturnType<typeof FormTemplateSchema.safeParse>,
   metrics: AdapterResult['metrics'],
 ): AdapterResult {
   if (!parsed.success) {

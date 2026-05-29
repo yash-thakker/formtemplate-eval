@@ -1,32 +1,34 @@
-import type { ExtractedTemplate } from '../schema.js';
+import type { FormTemplate } from '../schema.js';
 import type { ScoreReport } from '../types.js';
-import { matchFields } from './match-fields.js';
-import { fieldRecall } from './field-recall.js';
-import { fieldPrecision, fieldF1 } from './field-precision.js';
+import { flattenQuestions, matchQuestions } from './match-fields.js';
+import { questionRecall } from './field-recall.js';
+import { questionPrecision, questionF1 } from './field-precision.js';
 import { typeAccuracy } from './type-accuracy.js';
 import { sectionAccuracy } from './section-accuracy.js';
-import { meanLabelSimilarity } from './label-similarity.js';
+import { meanQuestionSimilarity } from './label-similarity.js';
 import { requiredAccuracy } from './required-accuracy.js';
 
 export interface ScoreOptions {
-  minLabelSimilarity?: number;
+  minQuestionSimilarity?: number;
 }
 
 export function scoreTemplate(
-  extracted: ExtractedTemplate,
-  expected: ExtractedTemplate,
+  extracted: FormTemplate,
+  expected: FormTemplate,
   options: ScoreOptions = {},
 ): ScoreReport {
-  const match = matchFields(extracted.fields, expected.fields, options.minLabelSimilarity);
-  const recall = fieldRecall(match, expected.fields.length);
-  const precision = fieldPrecision(match, extracted.fields.length);
+  const extractedFlat = flattenQuestions(extracted);
+  const expectedFlat = flattenQuestions(expected);
+  const match = matchQuestions(extractedFlat, expectedFlat, options.minQuestionSimilarity);
+  const recall = questionRecall(match, expectedFlat.length);
+  const precision = questionPrecision(match, extractedFlat.length);
   return {
     fieldRecall: recall,
     fieldPrecision: precision,
-    fieldF1: fieldF1(precision, recall),
+    fieldF1: questionF1(precision, recall),
     typeAccuracy: typeAccuracy(match),
-    sectionAccuracy: sectionAccuracy(match, extracted, expected),
-    labelSimilarity: meanLabelSimilarity(match),
+    sectionAccuracy: sectionAccuracy(match),
+    labelSimilarity: meanQuestionSimilarity(match),
     requiredAccuracy: requiredAccuracy(match),
     matchedPairs: match.matched.length,
     unmatched: {

@@ -1,30 +1,16 @@
+import { randomUUID } from 'node:crypto';
 import type { Block } from '@aws-sdk/client-textract';
-import type { ExtractedTemplate, Field, FieldType, Section } from '../schema.js';
+import type { FieldType, FormTemplate, FormTemplateSection, QuestionField } from '../schema.js';
 
-function slugify(s: string): string {
-  return s
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .trim()
-    .replace(/\s+/g, '-')
-    .slice(0, 60);
-}
-
-function ensureUnique(id: string, used: Set<string>): string {
-  let candidate = id || 'field';
-  let n = 1;
-  while (used.has(candidate)) {
-    candidate = `${id}-${n++}`;
-  }
-  used.add(candidate);
-  return candidate;
-}
-
-function inferType(label: string): FieldType {
+function inferType(label: string, isSelection: boolean): FieldType {
+  if (isSelection) return 'single-select';
   const l = label.toLowerCase();
-  if (/(date|dob|birth)/.test(l)) return 'date';
-  if (/(no\.?|number|qty|quantity|amount|total|count)/.test(l)) return 'number';
-  return 'text';
+  if (/\b(signature|signed|signee|sign here)\b/.test(l)) return 'users';
+  if (/(date|dob|birth)/.test(l)) return 'date-time';
+  if (/(no\.?|number|qty|quantity|amount|total|count|#)/.test(l)) return 'number';
+  if (/(describe|description|notes|comments|details|remarks|explain)/.test(l)) return 'multi-line';
+  if (/(url|website|link)/.test(l)) return 'url';
+  return 'single-line';
 }
 
 function blocksById(blocks: Block[]): Map<string, Block> {
@@ -60,74 +46,150 @@ function hasSelectionChild(block: Block, byId: Map<string, Block>): boolean {
   return false;
 }
 
-/**
- * Project a Textract Block list (from AnalyzeDocument with FORMS + TABLES +
- * LAYOUT + SIGNATURES) into our ExtractedTemplate shape.
- *
- * Rules (per spec):
- *   - KEY_VALUE_SET (KEY) → field; type 'checkbox' if VALUE contains a
- *     SELECTION_ELEMENT, otherwise inferred from the label.
- *   - SIGNATURE → field with type 'signature'.
- *   - TABLE → field with type 'table'.
- *   - LAYOUT_SECTION_HEADER → section.
- *   - LAYOUT_TITLE → form name (first one wins).
- */
-export function blocksToTemplate(blocks: Block[]): ExtractedTemplate {
-  const byId = blocksById(blocks);
-  const sections: Section[] = [];
-  const fields: Field[] = [];
-  let name = 'Untitled Form';
-
-  const usedIds = new Set<string>();
-  const usedSectionIds = new Set<string>();
-  let sectionOrder = 0;
-
-  for (const b of blocks) {
-    if (b.BlockType === 'LAYOUT_TITLE') {
-      const t = textFor(b, byId);
-      if (t && name === 'Untitled Form') name = t;
-    } else if (b.BlockType === 'LAYOUT_SECTION_HEADER') {
-      const title = textFor(b, byId);
-      if (!title) continue;
-      const id = ensureUnique(slugify(title) || 'section', usedSectionIds);
-      sections.push({ id, title, order: sectionOrder++ });
-    }
+function buildQuestion(
+  questionValue: string,
+  fieldType: FieldType,
+): QuestionField {
+  const base = {
+    _id: randomUUID(),
+    fieldLabel: 'Label',
+    questionValue,
+    isMandatory: false,
+  };
+  switch (fieldType) {
+    case 'single-select':
+    case 'multi-select':
+      return { ...base, fieldType, answerChoices: ['Yes', 'No'], viewType: 'list' };
+    case 'date-time':
+      return { ...base, fieldType, displayAs: 'dateOnly' };
+    case 'users':
+      return { ...base, fieldType, viewType: 'card', selectionType: 'singleUser' };
+    case 'look-up':
+      return { ...base, fieldType, lookUpAnsFieldType: 'Location' };
+    case 'single-line':
+    case 'multi-line':
+    case 'number':
+    case 'fileUpload':
+    case 'image':
+    case 'geoLocation':
+    case 'url':
+      return { ...base, fieldType };
   }
+}
+
+/**
+ * Project Textract Blocks (FORMS + TABLES + LAYOUT + SIGNATURES) into the
+ * Cube FormTemplate shape.
+ *
+ * Rules:
+ *   - LAYOUT_TITLE → form `name` (first one wins).
+ *   - LAYOUT_SECTION_HEADER → a new section break. Questions following the
+ *     header until the next header live inside it.
+ *   - KEY_VALUE_SET (KEY) → a question. Type is `single-select` if the
+ *     paired VALUE contains a SELECTION_ELEMENT, otherwise inferred from
+ *     the label.
+ *   - SIGNATURE → a `users` question (the platform's signature equivalent).
+ *   - TABLE → a separate SECTION_TYPE_TABLE_SECTION with one question per
+ *     header cell.
+ *
+ * Every section emitted gets a sectionCode; non-table sections default to
+ * SECTION_TYPE_BLANK_SECTION.
+ */
+export function blocksToTemplate(blocks: Block[]): FormTemplate {
+  const byId = blocksById(blocks);
+  let name = 'Untitled Form';
+  const sections: FormTemplateSection[] = [];
+
+  // Use a single implicit "Header" section to collect anything before the
+  // first explicit LAYOUT_SECTION_HEADER.
+  let currentBlank: FormTemplateSection = {
+    _id: randomUUID(),
+    sectionHeading: 'Header',
+    sectionCode: 'SECTION_TYPE_BLANK_SECTION',
+    questionFields: [],
+  };
+  sections.push(currentBlank);
 
   for (const b of blocks) {
-    if (b.BlockType === 'KEY_VALUE_SET' && b.EntityTypes?.includes('KEY')) {
-      const label = textFor(b, byId);
-      if (!label) continue;
-      // Look up the VALUE block paired via Relationships.VALUE
-      let valueBlock: Block | undefined;
-      for (const rel of b.Relationships ?? []) {
-        if (rel.Type === 'VALUE' && rel.Ids) {
-          for (const id of rel.Ids) {
-            const v = byId.get(id);
-            if (v?.BlockType === 'KEY_VALUE_SET') valueBlock = v;
+    switch (b.BlockType) {
+      case 'LAYOUT_TITLE': {
+        const t = textFor(b, byId);
+        if (t && name === 'Untitled Form') name = t;
+        break;
+      }
+      case 'LAYOUT_SECTION_HEADER': {
+        const heading = textFor(b, byId);
+        if (!heading) break;
+        currentBlank = {
+          _id: randomUUID(),
+          sectionHeading: heading,
+          sectionCode: 'SECTION_TYPE_BLANK_SECTION',
+          questionFields: [],
+        };
+        sections.push(currentBlank);
+        break;
+      }
+      case 'KEY_VALUE_SET': {
+        if (!b.EntityTypes?.includes('KEY')) break;
+        const label = textFor(b, byId);
+        if (!label) break;
+        let valueBlock: Block | undefined;
+        for (const rel of b.Relationships ?? []) {
+          if (rel.Type === 'VALUE' && rel.Ids) {
+            for (const id of rel.Ids) {
+              const v = byId.get(id);
+              if (v?.BlockType === 'KEY_VALUE_SET') valueBlock = v;
+            }
           }
         }
+        const isSelection = valueBlock ? hasSelectionChild(valueBlock, byId) : false;
+        const fieldType = inferType(label, isSelection);
+        currentBlank.questionFields.push(buildQuestion(label, fieldType));
+        break;
       }
-      const type: FieldType =
-        valueBlock && hasSelectionChild(valueBlock, byId) ? 'checkbox' : inferType(label);
-      const id = ensureUnique(slugify(label) || 'field', usedIds);
-      fields.push({ id, label, type, required: false });
-    } else if (b.BlockType === 'SIGNATURE') {
-      const id = ensureUnique('signature', usedIds);
-      fields.push({ id, label: 'Signature', type: 'signature', required: false });
-    } else if (b.BlockType === 'TABLE') {
-      const id = ensureUnique('table', usedIds);
-      fields.push({ id, label: 'Table', type: 'table', required: false });
+      case 'SIGNATURE': {
+        currentBlank.questionFields.push(buildQuestion('Signature', 'users'));
+        break;
+      }
+      case 'TABLE': {
+        // Each TABLE becomes its own section. Header cells (first row) become
+        // the question fields of the table section.
+        const tableSection: FormTemplateSection = {
+          _id: randomUUID(),
+          sectionHeading: 'Table',
+          sectionCode: 'SECTION_TYPE_TABLE_SECTION',
+          questionFields: [],
+        };
+        const cellIds: string[] = [];
+        for (const rel of b.Relationships ?? []) {
+          if (rel.Type === 'CHILD' && rel.Ids) cellIds.push(...rel.Ids);
+        }
+        const firstRowCells = cellIds
+          .map((id) => byId.get(id))
+          .filter((c): c is Block => c?.BlockType === 'CELL' && c.RowIndex === 1);
+        for (const cell of firstRowCells) {
+          const text = textFor(cell, byId);
+          if (!text) continue;
+          tableSection.questionFields.push(buildQuestion(text, inferType(text, false)));
+        }
+        if (tableSection.questionFields.length > 0) sections.push(tableSection);
+        break;
+      }
+      default:
+        break;
     }
   }
 
-  return { name, sections, fields };
+  // Drop the implicit Header section if it ended up empty.
+  const cleanSections = sections.filter((s, i) => !(i === 0 && s.questionFields.length === 0));
+
+  return { name, description: '', template: cleanSections };
 }
 
 /**
  * Compact textual rendering of Textract Blocks for handing to an LLM as
- * context. Filters to the blocks the LLM actually needs (KEY/VALUE pairs,
- * table cells, layout headers/titles, signatures), no raw WORD spam.
+ * context. Filtered to the blocks the LLM cares about (keys, signatures,
+ * section headers, tables, titles); no raw WORD spam.
  */
 export function blocksToCompactText(blocks: Block[]): string {
   const byId = blocksById(blocks);
@@ -153,7 +215,7 @@ export function blocksToCompactText(blocks: Block[]): string {
             }
           }
           const hasSel = valueBlock ? hasSelectionChild(valueBlock, byId) : false;
-          lines.push(`KEY: ${textFor(b, byId)}${hasSel ? '  [checkbox]' : ''}`);
+          lines.push(`KEY: ${textFor(b, byId)}${hasSel ? '  [selection]' : ''}`);
         }
         break;
       case 'SIGNATURE':

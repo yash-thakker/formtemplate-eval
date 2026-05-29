@@ -1,6 +1,11 @@
-import type { ExtractedTemplate, Field } from './schema.js';
+import type { FormTemplate, QuestionField, FormTemplateSection } from './schema.js';
 
-export type { ExtractedTemplate, Field, Section, FieldType } from './schema.js';
+export type {
+  FormTemplate,
+  QuestionField,
+  FormTemplateSection,
+  FieldType,
+} from './schema.js';
 
 export interface AdapterMetrics {
   latencyMs: number;
@@ -11,7 +16,7 @@ export interface AdapterMetrics {
 }
 
 export interface AdapterResult {
-  result: ExtractedTemplate | null;
+  result: FormTemplate | null;
   rawOutput: unknown;
   metrics: AdapterMetrics;
   error?: { message: string; stack?: string };
@@ -31,18 +36,32 @@ export interface ExtractionAdapter {
   extract(pdfPath: string, fixtureMeta: FixtureMeta): Promise<AdapterResult>;
 }
 
+/**
+ * A QuestionField annotated with the section it belongs to. Scoring uses
+ * this flattened-with-context view: matching happens globally across the
+ * form, but section provenance is preserved so `sectionAccuracy` can
+ * compare the section heading + sectionCode of each matched pair.
+ */
+export interface QuestionWithSection {
+  question: QuestionField;
+  section: FormTemplateSection;
+}
+
 export interface ScoreReport {
   fieldRecall: number;
   fieldPrecision: number;
   fieldF1: number;
   typeAccuracy: number;
+  /** Combined heading-fuzzy-match + sectionCode-equality on matched pairs. */
   sectionAccuracy: number;
+  /** Mean Levenshtein similarity of questionValue across matched pairs. */
   labelSimilarity: number;
+  /** Equality of `isMandatory` across matched pairs. */
   requiredAccuracy: number;
   matchedPairs: number;
   unmatched: {
-    extractedExtra: Field[];
-    expectedMissing: Field[];
+    extractedExtra: QuestionWithSection[];
+    expectedMissing: QuestionWithSection[];
   };
 }
 
@@ -60,7 +79,7 @@ export interface BenchmarkRow {
 export interface Fixture {
   meta: FixtureMeta;
   pdfPath: string;
-  expected: ExtractedTemplate;
+  expected: FormTemplate;
 }
 
 export interface BenchmarkRunMetadata {

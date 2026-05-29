@@ -9,7 +9,7 @@ import { printTerminalReport } from './report/terminal.js';
 import { renderMarkdownReport } from './report/markdown.js';
 import { logger } from './utils/logger.js';
 import { getEnv } from './config.js';
-import { ExtractedTemplateSchema } from './schema.js';
+import { FormTemplateSchema } from './schema.js';
 
 const program = new Command();
 program.name('eval').description('Form-extraction benchmark/eval CLI').version('0.1.0');
@@ -33,7 +33,8 @@ program
       console.log(`  (none — drop input.pdf + expected.json + meta.json into ${FIXTURES_DIR}/<id>/)`);
     } else {
       for (const f of fixtures) {
-        console.log(`  - ${f.meta.id}  ${f.meta.name}  fields=${f.expected.fields.length} sections=${f.expected.sections.length}`);
+        const qCount = f.expected.template.reduce((s, sec) => s + sec.questionFields.length, 0);
+        console.log(`  - ${f.meta.id}  ${f.meta.name}  questions=${qCount} sections=${f.expected.template.length}`);
       }
     }
     /* eslint-enable no-console */
@@ -91,13 +92,14 @@ program
       console.error(`Fixture ${opts.id} not found or missing required files at ${dir}`);
       process.exit(1);
     }
-    const parsed = ExtractedTemplateSchema.safeParse(fixture.expected);
+    const parsed = FormTemplateSchema.safeParse(fixture.expected);
     if (!parsed.success) {
       console.error(`Schema invalid for fixture ${opts.id}:`);
       console.error(parsed.error.message);
       process.exit(1);
     }
-    console.log(`OK — fixture ${opts.id}: ${fixture.expected.fields.length} fields, ${fixture.expected.sections.length} sections`);
+    const qCount = fixture.expected.template.reduce((s, sec) => s + sec.questionFields.length, 0);
+    console.log(`OK — fixture ${opts.id}: ${qCount} questions across ${fixture.expected.template.length} sections`);
     /* eslint-enable no-console */
   });
 

@@ -1,6 +1,6 @@
 import type { MatchResult } from './match-fields.js';
 
-export function fieldRecall(match: MatchResult, expectedCount: number): number {
+export function questionRecall(match: MatchResult, expectedCount: number): number {
   if (expectedCount === 0) return 1;
   return match.matched.length / expectedCount;
 }
