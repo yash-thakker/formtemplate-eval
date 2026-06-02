@@ -38,11 +38,20 @@ export const textractQueriesAdapter: ExtractionAdapter = {
       for (const b of blocks) {
         if (b.BlockType !== 'QUERY' || !b.Query) continue;
         const questionValue = b.Query.Text ?? b.Query.Alias ?? 'query';
+        // A QUERY may have multiple QUERY_RESULT links; pick the highest-confidence one.
         let answer: string | undefined;
+        let bestConfidence = -Infinity;
         for (const rel of b.Relationships ?? []) {
           if (rel.Type !== 'ANSWER' || !rel.Ids) continue;
-          const ans = blocks.find((x) => x.Id === rel.Ids![0] && x.BlockType === 'QUERY_RESULT');
-          if (ans?.Text) answer = ans.Text;
+          for (const id of rel.Ids) {
+            const ans = blocks.find((x) => x.Id === id && x.BlockType === 'QUERY_RESULT');
+            if (!ans?.Text) continue;
+            const conf = ans.Confidence ?? 0;
+            if (conf > bestConfidence) {
+              answer = ans.Text;
+              bestConfidence = conf;
+            }
+          }
         }
         questionFields.push({
           _id: randomUUID(),

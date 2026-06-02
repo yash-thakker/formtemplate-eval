@@ -37,37 +37,51 @@ export function getEnv(): Env {
 /**
  * Provider pricing — USD per million tokens for LLMs, USD per page for OCR.
  *
- * NOTE: numbers are best-effort as of project start. Confirm against the
- * provider's pricing page before publishing benchmark results.
+ * Numbers below were verified against current provider docs (2026). Re-confirm
+ * before publishing benchmark numbers — pricing pages drift.
  *   - Google: https://ai.google.dev/pricing
  *   - Anthropic: https://www.anthropic.com/pricing
  *   - OpenAI: https://openai.com/api/pricing
  *   - AWS Textract: https://aws.amazon.com/textract/pricing/
- *   - Sarvam: https://docs.sarvam.ai/api-reference-docs/document-ai
+ *   - Sarvam: https://docs.sarvam.ai/api-reference-docs/pricing
+ *
+ * Notes:
+ *   - Gemini 2.5 Pro has a tiered rate (≤200K tokens vs >200K). The flat
+ *     numbers below approximate the ≤200K tier; large prompts will undercount.
+ *   - Textract SIGNATURES is free when combined with FORMS / TABLES / QUERIES.
+ *     `textract-only` (FORMS+TABLES+LAYOUT+SIGNATURES) cost calc sums only
+ *     FORMS+TABLES+LAYOUT for that reason.
+ *   - Sarvam pricing is ₹0.5/page; ~$0.006/page at ₹83/USD. Currency drifts;
+ *     re-check before publishing.
  */
 export const PRICING = {
   'gemini-2.5-flash': { inputPerMillion: 0.3, outputPerMillion: 2.5 },
-  'gemini-2.5-pro': { inputPerMillion: 1.25, outputPerMillion: 5.0 },
+  'gemini-2.5-pro': { inputPerMillion: 1.25, outputPerMillion: 10.0 },
   'claude-sonnet-4-6': { inputPerMillion: 3.0, outputPerMillion: 15.0 },
-  'gpt-5': { inputPerMillion: 2.5, outputPerMillion: 10.0 },
+  'gpt-5': { inputPerMillion: 1.25, outputPerMillion: 10.0 },
   'textract-forms': { perPage: 0.05 },
   'textract-queries': { perPage: 0.015 },
   'textract-tables': { perPage: 0.015 },
-  'textract-signatures': { perPage: 0.0035 },
-  'sarvam-doc-intel': { perPage: 0.018 },
+  'textract-layout': { perPage: 0.004 },
+  'textract-signatures': { perPage: 0.0025 },
+  'sarvam-doc-intel': { perPage: 0.006 },
 } as const;
 
 export type PricingKey = keyof typeof PRICING;
+type LLMKey = 'gemini-2.5-flash' | 'gemini-2.5-pro' | 'claude-sonnet-4-6' | 'gpt-5';
+type OcrKey =
+  | 'textract-forms'
+  | 'textract-queries'
+  | 'textract-tables'
+  | 'textract-layout'
+  | 'textract-signatures'
+  | 'sarvam-doc-intel';
 
-export function llmCost(
-  modelKey: 'gemini-2.5-flash' | 'gemini-2.5-pro' | 'claude-sonnet-4-6' | 'gpt-5',
-  inputTokens: number,
-  outputTokens: number,
-): number {
+export function llmCost(modelKey: LLMKey, inputTokens: number, outputTokens: number): number {
   const p = PRICING[modelKey];
   return (inputTokens / 1_000_000) * p.inputPerMillion + (outputTokens / 1_000_000) * p.outputPerMillion;
 }
 
-export function ocrCost(modelKey: 'textract-forms' | 'textract-queries' | 'textract-tables' | 'textract-signatures' | 'sarvam-doc-intel', pages: number): number {
+export function ocrCost(modelKey: OcrKey, pages: number): number {
   return PRICING[modelKey].perPage * pages;
 }

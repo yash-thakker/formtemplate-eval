@@ -45,10 +45,11 @@ export const textractPlusLlmAdapter: ExtractionAdapter = {
       const latencyMs = performance.now() - start;
       const inputTokens = response.usage?.promptTokens ?? 0;
       const outputTokens = response.usage?.completionTokens ?? 0;
+      // FORMS+TABLES+LAYOUT pages; SIGNATURES free when combined.
       const costUsd =
         ocrCost('textract-forms', pages) +
         ocrCost('textract-tables', pages) +
-        ocrCost('textract-signatures', pages) +
+        ocrCost('textract-layout', pages) +
         llmCost('gemini-2.5-flash', inputTokens, outputTokens);
 
       const parsed = FormTemplateSchema.safeParse(response.object);

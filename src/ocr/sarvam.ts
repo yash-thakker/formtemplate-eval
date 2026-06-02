@@ -1,107 +1,80 @@
-import { readFile } from 'node:fs/promises';
-import { basename } from 'node:path';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join, basename } from 'node:path';
+import AdmZip from 'adm-zip';
+import { type SarvamAI, SarvamAIClient } from 'sarvamai';
 import { getEnv } from '../config.js';
 import { logger } from '../utils/logger.js';
 
-/**
- * Sarvam Document Intelligence (Document Digitisation) async job client.
- *
- * Flow:
- *   1. POST /document-ai/digitise → returns job_id + upload_url
- *   2. PUT the PDF bytes to upload_url
- *   3. POST /document-ai/digitise/{id}/start
- *   4. Poll GET /document-ai/digitise/{id} until status === 'completed'
- *   5. GET the result download URL and fetch the markdown content
- *
- * Endpoint paths reflect Sarvam's API surface at project start; if Sarvam
- * changes URL structure, update only this file. No official Node SDK exists.
- */
-
-const SARVAM_BASE = 'https://api.sarvam.ai';
-const POLL_INTERVAL_MS = 2_000;
-const POLL_MAX_MS = 120_000;
-
 export interface SarvamDigitiseResult {
-  /** Markdown rendering of the document. */
+  /** Markdown rendering of the document, extracted from the result ZIP. */
   markdown: string;
-  /** Number of pages processed (for cost calc). */
+  /** Number of pages reported by the job's page metrics (for cost calc). */
   pages: number;
 }
 
-interface CreateJobResponse {
-  job_id: string;
-  upload_url: string;
-}
-
-interface JobStatusResponse {
-  job_id: string;
-  status: 'queued' | 'running' | 'completed' | 'failed';
-  error?: string;
-  output_url?: string;
-  page_count?: number;
-}
-
-async function jsonOrThrow(res: Response, label: string): Promise<unknown> {
-  if (!res.ok) {
-    const body = await res.text().catch(() => '');
-    throw new Error(`Sarvam ${label} failed: ${res.status} ${res.statusText} — ${body.slice(0, 300)}`);
-  }
-  return res.json();
-}
-
-export async function digitiseDocument(pdfPath: string, language?: string): Promise<SarvamDigitiseResult> {
+/**
+ * Run Sarvam's Document Digitisation pipeline and return the markdown output.
+ *
+ * Uses the official `sarvamai` SDK's fluent job API:
+ *   createJob → uploadFile → start → waitUntilComplete → downloadOutput
+ *
+ * The output is delivered as a ZIP archive containing a .md file plus a
+ * page-level JSON sidecar. We extract just the .md and return it as a string.
+ *
+ * Job limits per current docs:
+ *   - PDF: max 10 pages, 200 MB
+ *   - Languages: BCP-47 codes (e.g. en-IN, hi-IN). Defaults to hi-IN if unset.
+ */
+export async function digitiseDocument(
+  pdfPath: string,
+  language?: string,
+): Promise<SarvamDigitiseResult> {
   const env = getEnv();
   if (!env.SARVAM_API_KEY) throw new Error('SARVAM_API_KEY is not set');
-  const headers = { 'api-subscription-key': env.SARVAM_API_KEY } as const;
 
-  // 1. Create job
-  const createBody = { file_name: basename(pdfPath), ...(language ? { language } : {}) };
-  const createRes = await fetch(`${SARVAM_BASE}/document-ai/digitise`, {
-    method: 'POST',
-    headers: { ...headers, 'content-type': 'application/json' },
-    body: JSON.stringify(createBody),
-  });
-  const { job_id, upload_url } = (await jsonOrThrow(createRes, 'create job')) as CreateJobResponse;
-  logger.debug({ job_id }, 'sarvam job created');
+  const client = new SarvamAIClient({ apiSubscriptionKey: env.SARVAM_API_KEY });
 
-  // 2. Upload PDF bytes
-  const bytes = await readFile(pdfPath);
-  const uploadRes = await fetch(upload_url, {
-    method: 'PUT',
-    headers: { 'content-type': 'application/pdf' },
-    body: bytes,
+  // Default to English; pass an explicit BCP-47 code if provided.
+  // SDK validates the value at runtime against its DocDigitizationSupportedLanguage union.
+  const lang = (language ?? 'en-IN') as SarvamAI.DocDigitizationSupportedLanguage;
+
+  const job = await client.documentIntelligence.createJob({
+    language: lang,
+    outputFormat: 'md',
   });
-  if (!uploadRes.ok) {
-    throw new Error(`Sarvam upload failed: ${uploadRes.status} ${uploadRes.statusText}`);
+  logger.debug({ jobId: job.jobId }, 'sarvam: job created');
+
+  await job.uploadFile(pdfPath);
+  logger.debug({ jobId: job.jobId }, 'sarvam: file uploaded');
+
+  await job.start();
+  logger.debug({ jobId: job.jobId }, 'sarvam: job started');
+
+  const status = await job.waitUntilComplete();
+  logger.debug({ jobId: job.jobId, state: status.job_state }, 'sarvam: job done');
+  if (status.job_state === 'Failed') {
+    throw new Error(`Sarvam job failed for ${basename(pdfPath)}`);
   }
 
-  // 3. Start
-  const startRes = await fetch(`${SARVAM_BASE}/document-ai/digitise/${job_id}/start`, {
-    method: 'POST',
-    headers,
-  });
-  await jsonOrThrow(startRes, 'start job');
+  // Download the result ZIP to a temp directory, then extract the .md entry.
+  const workDir = await mkdtemp(join(tmpdir(), 'sarvam-'));
+  const zipPath = join(workDir, 'output.zip');
+  try {
+    await job.downloadOutput(zipPath);
+    const zipBytes = await readFile(zipPath);
+    const zip = new AdmZip(zipBytes);
+    const mdEntry = zip
+      .getEntries()
+      .find((e) => !e.isDirectory && e.entryName.toLowerCase().endsWith('.md'));
+    if (!mdEntry) {
+      throw new Error('Sarvam result ZIP did not contain a .md file');
+    }
+    const markdown = mdEntry.getData().toString('utf8');
 
-  // 4. Poll
-  const deadline = Date.now() + POLL_MAX_MS;
-  let status: JobStatusResponse | null = null;
-  while (Date.now() < deadline) {
-    await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
-    const pollRes = await fetch(`${SARVAM_BASE}/document-ai/digitise/${job_id}`, { headers });
-    status = (await jsonOrThrow(pollRes, 'poll job')) as JobStatusResponse;
-    logger.debug({ job_id, status: status.status }, 'sarvam poll');
-    if (status.status === 'completed' || status.status === 'failed') break;
+    const pages = job.getPageMetrics().totalPages || 1;
+    return { markdown, pages };
+  } finally {
+    await rm(workDir, { recursive: true, force: true });
   }
-
-  if (!status) throw new Error('Sarvam: no status received before timeout');
-  if (status.status === 'failed') throw new Error(`Sarvam job failed: ${status.error ?? 'unknown'}`);
-  if (status.status !== 'completed') throw new Error(`Sarvam job did not complete within ${POLL_MAX_MS}ms`);
-  if (!status.output_url) throw new Error('Sarvam: completed but no output_url');
-
-  // 5. Fetch markdown
-  const outRes = await fetch(status.output_url);
-  if (!outRes.ok) throw new Error(`Sarvam output fetch failed: ${outRes.status}`);
-  const markdown = await outRes.text();
-
-  return { markdown, pages: status.page_count ?? 1 };
 }

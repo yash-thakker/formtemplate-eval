@@ -164,10 +164,13 @@ export function blocksToTemplate(blocks: Block[]): FormTemplate {
         for (const rel of b.Relationships ?? []) {
           if (rel.Type === 'CHILD' && rel.Ids) cellIds.push(...rel.Ids);
         }
-        const firstRowCells = cellIds
+        const cells = cellIds
           .map((id) => byId.get(id))
-          .filter((c): c is Block => c?.BlockType === 'CELL' && c.RowIndex === 1);
-        for (const cell of firstRowCells) {
+          .filter((c): c is Block => c?.BlockType === 'CELL');
+        // Prefer cells explicitly tagged as COLUMN_HEADER; fall back to row 1.
+        let headerCells = cells.filter((c) => c.EntityTypes?.includes('COLUMN_HEADER'));
+        if (headerCells.length === 0) headerCells = cells.filter((c) => c.RowIndex === 1);
+        for (const cell of headerCells) {
           const text = textFor(cell, byId);
           if (!text) continue;
           tableSection.questionFields.push(buildQuestion(text, inferType(text, false)));

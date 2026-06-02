@@ -15,10 +15,11 @@ export const textractOnlyAdapter: ExtractionAdapter = {
       const template = blocksToTemplate(blocks);
       const parsed = FormTemplateSchema.safeParse(template);
       const latencyMs = performance.now() - start;
+      // FORMS+TABLES+LAYOUT pages; SIGNATURES is free when combined.
       const costUsd =
         ocrCost('textract-forms', pages) +
         ocrCost('textract-tables', pages) +
-        ocrCost('textract-signatures', pages);
+        ocrCost('textract-layout', pages);
       return buildResult(blocks, parsed, { latencyMs, costUsd, ocrPages: pages });
     } catch (err) {
       const e = err as Error;
