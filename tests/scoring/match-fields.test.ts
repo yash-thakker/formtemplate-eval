@@ -17,12 +17,19 @@ function q(questionValue: string, fieldType: QuestionField['fieldType'] = 'singl
   return { ...base, fieldType } as QuestionField;
 }
 
-function section(heading: string, questions: QuestionField[], code: FormTemplateSection['sectionCode'] = 'SECTION_TYPE_BLANK_SECTION'): FormTemplateSection {
+function section(
+  heading: string,
+  questions: QuestionField[],
+  code: FormTemplateSection['sectionCode'] = 'SECTION_TYPE_BLANK_SECTION',
+): FormTemplateSection {
+  if (code === 'SECTION_TYPE_TABLE_SECTION') {
+    return { _id: uuid(), sectionHeading: heading, sectionCode: code, columnFields: questions, rowFields: [] };
+  }
   return { _id: uuid(), sectionHeading: heading, sectionCode: code, questionFields: questions };
 }
 
-function tmpl(sections: FormTemplateSection[], name = 'Form'): FormTemplate {
-  return { name, description: '', template: sections };
+function tmpl(sections: FormTemplateSection[]): FormTemplate {
+  return { template: sections };
 }
 
 function withSec(question: QuestionField, sec: FormTemplateSection): QuestionWithSection {

@@ -1,6 +1,12 @@
-import type { FormTemplate, QuestionField, FormTemplateSection } from './schema.js';
+import type {
+  ColumnHeader,
+  FormTemplate,
+  FormTemplateSection,
+  QuestionField,
+} from './schema.js';
 
 export type {
+  ColumnHeader,
   FormTemplate,
   QuestionField,
   FormTemplateSection,
@@ -37,13 +43,18 @@ export interface ExtractionAdapter {
 }
 
 /**
- * A QuestionField annotated with the section it belongs to. Scoring uses
- * this flattened-with-context view: matching happens globally across the
- * form, but section provenance is preserved so `sectionAccuracy` can
- * compare the section heading + sectionCode of each matched pair.
+ * A question OR a label-only column header, annotated with the section it
+ * belongs to. Scoring uses this flattened-with-context view: matching
+ * happens globally across the form on `questionValue`, while section
+ * provenance is preserved so `sectionAccuracy` can compare the section
+ * heading + sectionCode of each matched pair.
+ *
+ * Label-only column entries (table sections) are included so they
+ * contribute to recall/precision and label similarity, but type and
+ * required accuracy guards skip them since they have no fieldType.
  */
 export interface QuestionWithSection {
-  question: QuestionField;
+  question: QuestionField | ColumnHeader;
   section: FormTemplateSection;
 }
 

@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import type { ExtractionAdapter, FixtureMeta, AdapterResult } from '../types.js';
-import type { FieldType, FormTemplate, FormTemplateSection, QuestionField } from '../schema.js';
+import type { BlankSection, FieldType, FormTemplate, QuestionField } from '../schema.js';
 import { FormTemplateSchema } from '../schema.js';
 import { digitiseDocument } from '../ocr/sarvam.js';
 import { ocrCost } from '../config.js';
@@ -47,9 +47,9 @@ function buildQuestion(questionValue: string, fieldType: FieldType): QuestionFie
  * doesn't tell us about table sections directly, so this baseline never
  * emits SECTION_TYPE_TABLE_SECTION — the +LLM variant is expected to.
  */
-function markdownToTemplate(markdown: string, name = 'Untitled Form'): FormTemplate {
-  const sections: FormTemplateSection[] = [];
-  let current: FormTemplateSection = {
+function markdownToTemplate(markdown: string): FormTemplate {
+  const sections: BlankSection[] = [];
+  let current: BlankSection = {
     _id: randomUUID(),
     sectionHeading: 'Header',
     sectionCode: 'SECTION_TYPE_BLANK_SECTION',
@@ -85,8 +85,6 @@ function markdownToTemplate(markdown: string, name = 'Untitled Form'): FormTempl
   }
 
   return {
-    name,
-    description: '',
     template: sections.filter((s, i) => !(i === 0 && s.questionFields.length === 0)),
   };
 }
@@ -98,7 +96,7 @@ export const sarvamOnlyAdapter: ExtractionAdapter = {
     const start = performance.now();
     try {
       const { markdown, pages } = await digitiseDocument(pdfPath, meta.language);
-      const template = markdownToTemplate(markdown, meta.name);
+      const template = markdownToTemplate(markdown);
       const parsed = FormTemplateSchema.safeParse(template);
       const latencyMs = performance.now() - start;
       const costUsd = ocrCost('sarvam-doc-intel', pages);

@@ -93,7 +93,7 @@ All scores are 0..1. Higher is better.
 | `fieldPrecision` | Of extracted fields, how many match an expected field? |
 | `fieldF1` | Harmonic mean of recall + precision. The headline number. |
 | `typeAccuracy` | Of matched fields, fraction with identical `type`. |
-| `sectionAccuracy` | Of matched fields, fraction whose section titles fuzzy-match (≥ 0.7). |
+| `sectionAccuracy` | Mean per-pair section-context score over matched fields. For each pair: raw Levenshtein similarity of section headings (0..1, no threshold); halved when `sectionCode` differs (BLANK vs TABLE structural mismatch). Soft by design — partial heading matches get partial credit. |
 | `labelSimilarity` | Mean normalized Levenshtein similarity of matched label pairs. |
 | `requiredAccuracy` | Of matched fields, fraction with identical `required` flag. |
 

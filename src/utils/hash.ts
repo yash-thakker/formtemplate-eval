@@ -5,7 +5,3 @@ export async function hashFile(path: string): Promise<string> {
   const buf = await readFile(path);
   return createHash('sha256').update(buf).digest('hex').slice(0, 16);
 }
-
-export function hashString(s: string): string {
-  return createHash('sha256').update(s).digest('hex').slice(0, 16);
-}

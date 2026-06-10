@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import type { Block } from '@aws-sdk/client-textract';
-import type { FieldType, FormTemplate, FormTemplateSection, QuestionField } from '../schema.js';
+import type { BlankSection, FieldType, FormTemplate, FormTemplateSection, QuestionField, TableSection } from '../schema.js';
 
 function inferType(label: string, isSelection: boolean): FieldType {
   if (isSelection) return 'single-select';
@@ -97,12 +97,11 @@ function buildQuestion(
  */
 export function blocksToTemplate(blocks: Block[]): FormTemplate {
   const byId = blocksById(blocks);
-  let name = 'Untitled Form';
   const sections: FormTemplateSection[] = [];
 
   // Use a single implicit "Header" section to collect anything before the
   // first explicit LAYOUT_SECTION_HEADER.
-  let currentBlank: FormTemplateSection = {
+  let currentBlank: BlankSection = {
     _id: randomUUID(),
     sectionHeading: 'Header',
     sectionCode: 'SECTION_TYPE_BLANK_SECTION',
@@ -112,11 +111,9 @@ export function blocksToTemplate(blocks: Block[]): FormTemplate {
 
   for (const b of blocks) {
     switch (b.BlockType) {
-      case 'LAYOUT_TITLE': {
-        const t = textFor(b, byId);
-        if (t && name === 'Untitled Form') name = t;
+      case 'LAYOUT_TITLE':
+        // Form title is project metadata, not part of the template body — skip.
         break;
-      }
       case 'LAYOUT_SECTION_HEADER': {
         const heading = textFor(b, byId);
         if (!heading) break;
@@ -152,13 +149,14 @@ export function blocksToTemplate(blocks: Block[]): FormTemplate {
         break;
       }
       case 'TABLE': {
-        // Each TABLE becomes its own section. Header cells (first row) become
-        // the question fields of the table section.
-        const tableSection: FormTemplateSection = {
+        // Each TABLE becomes its own section. Header cells become the typed
+        // columnFields; rowFields stays empty (rows are unlabeled records).
+        const tableSection: TableSection = {
           _id: randomUUID(),
           sectionHeading: 'Table',
           sectionCode: 'SECTION_TYPE_TABLE_SECTION',
-          questionFields: [],
+          columnFields: [],
+          rowFields: [],
         };
         const cellIds: string[] = [];
         for (const rel of b.Relationships ?? []) {
@@ -173,9 +171,9 @@ export function blocksToTemplate(blocks: Block[]): FormTemplate {
         for (const cell of headerCells) {
           const text = textFor(cell, byId);
           if (!text) continue;
-          tableSection.questionFields.push(buildQuestion(text, inferType(text, false)));
+          tableSection.columnFields.push(buildQuestion(text, inferType(text, false)));
         }
-        if (tableSection.questionFields.length > 0) sections.push(tableSection);
+        if (tableSection.columnFields.length > 0) sections.push(tableSection);
         break;
       }
       default:
@@ -184,9 +182,11 @@ export function blocksToTemplate(blocks: Block[]): FormTemplate {
   }
 
   // Drop the implicit Header section if it ended up empty.
-  const cleanSections = sections.filter((s, i) => !(i === 0 && s.questionFields.length === 0));
+  const cleanSections = sections.filter(
+    (s, i) => !(i === 0 && s.sectionCode === 'SECTION_TYPE_BLANK_SECTION' && s.questionFields.length === 0),
+  );
 
-  return { name, description: '', template: cleanSections };
+  return { template: cleanSections };
 }
 
 /**

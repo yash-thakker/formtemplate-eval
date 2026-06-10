@@ -6,7 +6,7 @@ import { renderMarkdownReport } from '../report/markdown.js';
 import { renderJsonReport } from '../report/json.js';
 
 const projectRoot = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
-export const REPORTS_DIR = join(projectRoot, 'reports');
+const REPORTS_DIR = join(projectRoot, 'reports');
 
 function timestampSlug(d = new Date()): string {
   const pad = (n: number) => n.toString().padStart(2, '0');

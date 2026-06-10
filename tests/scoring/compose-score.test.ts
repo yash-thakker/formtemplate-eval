@@ -16,12 +16,20 @@ function q(questionValue: string, fieldType: QuestionField['fieldType'] = 'singl
   return { ...base, fieldType } as QuestionField;
 }
 
-function section(heading: string, questions: QuestionField[], code: FormTemplateSection['sectionCode'] = 'SECTION_TYPE_BLANK_SECTION'): FormTemplateSection {
+function section(
+  heading: string,
+  questions: QuestionField[],
+  code: FormTemplateSection['sectionCode'] = 'SECTION_TYPE_BLANK_SECTION',
+): FormTemplateSection {
+  if (code === 'SECTION_TYPE_TABLE_SECTION') {
+    // Treat the questions as typed column fields; no row labels.
+    return { _id: uuid(), sectionHeading: heading, sectionCode: code, columnFields: questions, rowFields: [] };
+  }
   return { _id: uuid(), sectionHeading: heading, sectionCode: code, questionFields: questions };
 }
 
-function tmpl(sections: FormTemplateSection[], name = 'Form'): FormTemplate {
-  return { name, description: '', template: sections };
+function tmpl(sections: FormTemplateSection[]): FormTemplate {
+  return { template: sections };
 }
 
 describe('scoreTemplate', () => {
@@ -73,18 +81,28 @@ describe('scoreTemplate', () => {
     expect(r.sectionAccuracy).toBe(1);
   });
 
-  it('sectionAccuracy is 0 when sectionCode differs', () => {
+  it('sectionAccuracy halves when sectionCode differs (soft penalty, not zero)', () => {
     const expected = tmpl([section('Items', [q('Name')], 'SECTION_TYPE_BLANK_SECTION')]);
     const extracted = tmpl([section('Items', [q('Name')], 'SECTION_TYPE_TABLE_SECTION')]);
     const r = scoreTemplate(extracted, expected);
-    expect(r.sectionAccuracy).toBe(0);
+    expect(r.sectionAccuracy).toBe(0.5);
   });
 
-  it('sectionAccuracy is 0 when section headings differ too much', () => {
+  it('sectionAccuracy gives partial credit for somewhat-similar headings', () => {
+    const expected = tmpl([section('Personal Information', [q('Name')])]);
+    const extracted = tmpl([section('Personal Info', [q('Name')])]);
+    const r = scoreTemplate(extracted, expected);
+    // "personal info" vs "personal information" — Levenshtein similarity ~0.65.
+    // Soft scoring should reflect that, not collapse to 0.
+    expect(r.sectionAccuracy).toBeGreaterThan(0.5);
+    expect(r.sectionAccuracy).toBeLessThan(0.9);
+  });
+
+  it('sectionAccuracy is low (but not zero) for unrelated headings with same code', () => {
     const expected = tmpl([section('Personal Information', [q('Name')])]);
     const extracted = tmpl([section('Project Details', [q('Name')])]);
     const r = scoreTemplate(extracted, expected);
-    expect(r.sectionAccuracy).toBe(0);
+    expect(r.sectionAccuracy).toBeLessThan(0.4);
   });
 
   it('requiredAccuracy compares isMandatory across matched pairs', () => {
@@ -92,5 +110,42 @@ describe('scoreTemplate', () => {
     const extracted = tmpl([section('S', [q('Name', 'single-line', false)])]);
     const r = scoreTemplate(extracted, expected);
     expect(r.requiredAccuracy).toBe(0);
+  });
+
+  it('table section: matches rowFields + columnFields, excludes label-only from typeAccuracy', () => {
+    const expected: FormTemplate = {
+      template: [
+        {
+          _id: uuid(),
+          sectionHeading: 'Signatures',
+          sectionCode: 'SECTION_TYPE_TABLE_SECTION',
+          columnFields: [
+            { _id: uuid(), questionValue: 'Raised by Execution rep' },
+            { _id: uuid(), questionValue: 'Verified by QA/QC rep' },
+          ],
+          rowFields: [q('Signature with Date', 'date-time'), q('Name'), q('Designation')],
+        },
+      ],
+    };
+    const extracted: FormTemplate = {
+      template: [
+        {
+          _id: uuid(),
+          sectionHeading: 'Signatures',
+          sectionCode: 'SECTION_TYPE_TABLE_SECTION',
+          columnFields: [
+            { _id: uuid(), questionValue: 'Raised by Execution rep' },
+            { _id: uuid(), questionValue: 'Verified by QA/QC rep' },
+          ],
+          rowFields: [q('Signature with Date', 'date-time'), q('Name'), q('Designation')],
+        },
+      ],
+    };
+    const r = scoreTemplate(extracted, expected);
+    expect(r.matchedPairs).toBe(5); // 3 rows + 2 columns
+    expect(r.fieldRecall).toBe(1);
+    expect(r.fieldPrecision).toBe(1);
+    expect(r.typeAccuracy).toBe(1); // 3 typed row pairs, 0 label-only pairs counted in denominator
+    expect(r.sectionAccuracy).toBe(1);
   });
 });

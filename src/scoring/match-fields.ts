@@ -2,7 +2,7 @@ import levenshtein from 'fast-levenshtein';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore - no @types package
 import munkres from 'munkres-js';
-import type { FormTemplate } from '../schema.js';
+import type { FormTemplate, FormTemplateSection } from '../schema.js';
 import type { QuestionWithSection } from '../types.js';
 
 const DEFAULT_MIN_SIMILARITY = 0.6;
@@ -38,14 +38,26 @@ export function textSimilarity(a: string, b: string): number {
   return 1 - d / max;
 }
 
+function entriesOf(section: FormTemplateSection) {
+  if (section.sectionCode === 'SECTION_TYPE_BLANK_SECTION') return section.questionFields;
+  // Table section: merge both axes. Order is rows-first then columns so
+  // matching is deterministic when fields have similar labels.
+  return [...section.rowFields, ...section.columnFields];
+}
+
 /**
  * Flatten a FormTemplate into a list of `{ question, section }` tuples,
  * preserving section provenance for downstream scoring.
+ *
+ * For BLANK sections each `questionFields` entry becomes one row.
+ * For TABLE sections we collect both `rowFields` (typed) and `columnFields`
+ * (typed or label-only). Label-only column entries are still matched on
+ * `questionValue` but are excluded from type/required accuracy.
  */
 export function flattenQuestions(template: FormTemplate): QuestionWithSection[] {
   const out: QuestionWithSection[] = [];
   for (const section of template.template) {
-    for (const question of section.questionFields) {
+    for (const question of entriesOf(section)) {
       out.push({ question, section });
     }
   }

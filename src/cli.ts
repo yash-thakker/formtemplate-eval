@@ -33,7 +33,10 @@ program
       console.log(`  (none — drop input.pdf + expected.json + meta.json into ${FIXTURES_DIR}/<id>/)`);
     } else {
       for (const f of fixtures) {
-        const qCount = f.expected.template.reduce((s, sec) => s + sec.questionFields.length, 0);
+        const qCount = f.expected.template.reduce((s, sec) => {
+          if (sec.sectionCode === 'SECTION_TYPE_BLANK_SECTION') return s + sec.questionFields.length;
+          return s + sec.columnFields.length + sec.rowFields.length;
+        }, 0);
         console.log(`  - ${f.meta.id}  ${f.meta.name}  questions=${qCount} sections=${f.expected.template.length}`);
       }
     }
@@ -98,7 +101,10 @@ program
       console.error(parsed.error.message);
       process.exit(1);
     }
-    const qCount = fixture.expected.template.reduce((s, sec) => s + sec.questionFields.length, 0);
+    const qCount = fixture.expected.template.reduce((s, sec) => {
+      if (sec.sectionCode === 'SECTION_TYPE_BLANK_SECTION') return s + sec.questionFields.length;
+      return s + sec.columnFields.length + sec.rowFields.length;
+    }, 0);
     console.log(`OK — fixture ${opts.id}: ${qCount} questions across ${fixture.expected.template.length} sections`);
     /* eslint-enable no-console */
   });

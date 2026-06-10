@@ -75,20 +75,6 @@ export const UsersViewType = z.enum(['card', 'chip']);
  */
 export const UsersSelectionType = z.enum(['singleUser', 'multipleUser']);
 
-/**
- * Section-type tag. Every section must declare which it is:
- *   - `SECTION_TYPE_BLANK_SECTION`: a normal section of unrelated questions
- *     stacked vertically. The default for most form sections.
- *   - `SECTION_TYPE_TABLE_SECTION`: a tabular / repeating section where the
- *     same set of question fields repeats as rows.
- *
- * Extractors must pick one — there is no "unset" state.
- */
-export const SectionCode = z.enum([
-  'SECTION_TYPE_BLANK_SECTION',
-  'SECTION_TYPE_TABLE_SECTION',
-]);
-
 // ---------------------------------------------------------------------------
 // Common question-field shape (shared by every fieldType variant)
 // ---------------------------------------------------------------------------
@@ -99,8 +85,7 @@ export const SectionCode = z.enum([
  * Extraction guidance:
  *   - `_id`: generate a fresh UUID for every question. Not parsed from form.
  *   - `fieldLabel`: a UI label string (the platform shows it next to the
- *     input). On PDFs this is usually not visible content; default to
- *     "Label" when unsure.
+ *     input). On PDFs this is usually not visible content
  *   - `questionValue`: ⭐ the actual question text printed on the form
  *     (e.g., "Date of incident", "Employee full name"). THIS IS THE MOST
  *     IMPORTANT FIELD — extract verbatim where possible.
@@ -248,39 +233,94 @@ export const QuestionFieldSchema = z.discriminatedUnion('fieldType', [
 export type QuestionField = z.infer<typeof QuestionFieldSchema>;
 
 // ---------------------------------------------------------------------------
-// Section + top-level form template
+// Section types
 // ---------------------------------------------------------------------------
 
 /**
- * One section of a form. Sections group related questions.
- *
- * - `_id`: generated UUID, not parsed from the form.
- * - `sectionHeading`: the printed header text on the form (e.g.
- *   "Personal Information", "Incident Details").
- * - `sectionCode`: required. Pick `SECTION_TYPE_BLANK_SECTION` for normal
- *   sections, `SECTION_TYPE_TABLE_SECTION` for repeating/tabular sections.
- * - `questionFields`: the ordered list of questions inside this section.
+ * A label-only column header in a table section. Used when the column axis
+ * is categorical (each column names a record / role / party) and the row
+ * axis carries the field types. Contains only `_id` and `questionValue` —
+ * no fieldType, no isMandatory, no fieldLabel.
  */
-export const FormTemplateSectionSchema = z.object({
+export const ColumnHeaderSchema = z.object({
+  _id: z.string().uuid(),
+  questionValue: z.string(),
+});
+export type ColumnHeader = z.infer<typeof ColumnHeaderSchema>;
+
+/** Items inside a TableSection's columnFields: either typed columns or label-only headers. */
+export const ColumnEntrySchema = z.union([QuestionFieldSchema, ColumnHeaderSchema]);
+export type ColumnEntry = z.infer<typeof ColumnEntrySchema>;
+
+/**
+ * Type guard: did this entry come from QuestionFieldSchema (typed) rather
+ * than ColumnHeaderSchema (label-only)?
+ */
+export function isTypedEntry(entry: ColumnEntry | QuestionField): entry is QuestionField {
+  return 'fieldType' in entry;
+}
+
+/**
+ * A normal section — an ordered list of questions stacked vertically.
+ *
+ * Use this for almost every section on a form. Switch to a table section
+ * only when the form has an actual grid of inputs (rows × columns).
+ */
+export const BlankSectionSchema = z.object({
   _id: z.string().uuid(),
   sectionHeading: z.string(),
-  sectionCode: SectionCode,
+  sectionCode: z.literal('SECTION_TYPE_BLANK_SECTION'),
   questionFields: z.array(QuestionFieldSchema),
 });
+export type BlankSection = z.infer<typeof BlankSectionSchema>;
+
+/**
+ * A table section — a grid of inputs.
+ *
+ * Convention: **the row axis defines the cell type.** When both axes are
+ * populated, columns are categorical headers (one record per column) and
+ * each row of `rowFields` defines what to capture for every record.
+ *
+ * Three real-world shapes you'll see:
+ *
+ *   1. Columns are fields, rows are unlabeled records (e.g., a coordinate
+ *      table whose rows the user fills in at runtime):
+ *        columnFields: [<typed QuestionField per column>]
+ *        rowFields: []
+ *
+ *   2. Rows are fields, columns are categorical (e.g., a signature table
+ *      whose columns name the 4 parties signing):
+ *        columnFields: [<ColumnHeader per party — _id + questionValue only>]
+ *        rowFields: [<typed QuestionField per row>]
+ *
+ *   3. Both axes are categorical (rare, e.g., a yes/no matrix). Rare enough
+ *      that extractors should default to (2) for ambiguous cases.
+ */
+export const TableSectionSchema = z.object({
+  _id: z.string().uuid(),
+  sectionHeading: z.string(),
+  sectionCode: z.literal('SECTION_TYPE_TABLE_SECTION'),
+  columnFields: z.array(ColumnEntrySchema),
+  rowFields: z.array(QuestionFieldSchema),
+});
+export type TableSection = z.infer<typeof TableSectionSchema>;
+
+export const FormTemplateSectionSchema = z.discriminatedUnion('sectionCode', [
+  BlankSectionSchema,
+  TableSectionSchema,
+]);
 export type FormTemplateSection = z.infer<typeof FormTemplateSectionSchema>;
 
 /**
  * The top-level extraction target: a Cube form template.
  *
- * - `name`: the form's printed title in plain text.
- * - `description`: HTML-safe descriptive blurb — use the form's printed
- *   subtitle / preamble / purpose statement when present. Empty string
- *   is acceptable when the form has no explicit description.
+ * Only `template` is scored. The platform's full FormTemplate object has
+ * additional fields (name, description) but those are out of scope for this
+ * eval — extractors only need to produce the body of the form.
+ *
  * - `template`: the ordered list of sections — the body of the form.
  */
 export const FormTemplateSchema = z.object({
-  name: z.string(),
-  description: z.string(),
   template: z.array(FormTemplateSectionSchema),
 });
 export type FormTemplate = z.infer<typeof FormTemplateSchema>;

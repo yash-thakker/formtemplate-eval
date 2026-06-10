@@ -64,8 +64,6 @@ export const textractQueriesAdapter: ExtractionAdapter = {
       }
 
       const template = {
-        name: 'Untitled Form',
-        description: '',
         template: [
           {
             _id: randomUUID(),
