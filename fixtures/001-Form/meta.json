@@ -1,0 +1,6 @@
+{
+  "id": "001-Form",
+  "name": "MCRN RFI (Mumbai Coastal Road - Package C)",
+  "notes": "Single-page Request for Inspection form (Megha Engineering / MCRN Package C). Has work-detail blocks, multiple representative signature sections (Requested by / RFI Received by / Safety / QA-QC), an enclosures multi-select, approval status, and 4 contractor/BMC/GC/PMC reps.",
+  "language": "en-IN"
+}

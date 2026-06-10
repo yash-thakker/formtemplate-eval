@@ -1,0 +1,686 @@
+{
+  "template": [
+    {
+      "_id": "493e57bb-8a9c-4dbb-a00e-7c0a156fa55f",
+      "sectionHeading": "GTI Checklist — Identification",
+      "sectionCode": "SECTION_TYPE_BLANK_SECTION",
+      "questionFields": [
+        {
+          "_id": "72f73f7e-206b-42f8-b5ec-55593d7a1d98",
+          "fieldType": "single-line",
+          "questionValue": "GTI Location",
+          "isMandatory": false
+        },
+        {
+          "_id": "f0ce124b-01f2-46e1-ac9f-8ff22042f04f",
+          "fieldType": "date-time",
+          "questionValue": "Date",
+          "isMandatory": false,
+          "displayAs": "dateOnly"
+        },
+        {
+          "_id": "46f72866-0b78-4b77-9ff2-f3c76285323c",
+          "fieldType": "single-line",
+          "questionValue": "RFI No.",
+          "isMandatory": false
+        },
+        {
+          "_id": "854fb6eb-5cba-435e-938c-1a2b16c70ff1",
+          "fieldType": "single-line",
+          "questionValue": "Pier ID",
+          "isMandatory": false
+        },
+        {
+          "_id": "c5af923d-3fb5-40c9-8a90-c7aa548ac7b9",
+          "fieldType": "single-line",
+          "questionValue": "Reference Point",
+          "isMandatory": false
+        }
+      ]
+    },
+    {
+      "_id": "e2ee5676-e717-420c-b16c-c8141a198800",
+      "sectionHeading": "GTI Checklist — Co-ordinate Table",
+      "sectionCode": "SECTION_TYPE_TABLE_SECTION",
+      "columnFields": [
+        {
+          "_id": "4cb23e5a-848c-4a12-90e6-7c03de9467e1",
+          "fieldType": "number",
+          "questionValue": "Sl. No.",
+          "isMandatory": false
+        },
+        {
+          "_id": "474ed498-f367-4e2b-89ed-66c512aa2a55",
+          "fieldType": "single-line",
+          "questionValue": "GTI ID",
+          "isMandatory": false
+        },
+        {
+          "_id": "c609b502-ee93-4357-b9a0-d3891ebd5663",
+          "fieldType": "number",
+          "fieldLabel": "Drawing Co-ordinate",
+          "questionValue": "Easting",
+          "isMandatory": false
+        },
+        {
+          "_id": "858b3455-d4c0-4038-869a-c16e0f4d7221",
+          "fieldType": "number",
+          "fieldLabel": "Drawing Co-ordinate",
+          "questionValue": "Northing",
+          "isMandatory": false
+        },
+        {
+          "_id": "b2515230-02d7-4a34-923f-feb2cb0d0656",
+          "fieldType": "number",
+          "fieldLabel": "Observe Co-ordinate",
+          "questionValue": "Easting",
+          "isMandatory": false
+        },
+        {
+          "_id": "4f36b8bc-590a-4580-91ee-e8128873d168",
+          "fieldType": "number",
+          "fieldLabel": "Observe Co-ordinate",
+          "questionValue": "Northing",
+          "isMandatory": false
+        },
+        {
+          "_id": "03336968-8012-49b0-bde6-abac69a9c858",
+          "fieldType": "number",
+          "fieldLabel": "Diff",
+          "fieldInstruction": "in mm",
+          "questionValue": "E",
+          "isMandatory": false
+        },
+        {
+          "_id": "f82fd2ee-95dd-4f59-b649-a2cd9cd1e687",
+          "fieldType": "number",
+          "fieldLabel": "Diff",
+          "fieldInstruction": "in mm",
+          "questionValue": "N",
+          "isMandatory": false
+        },
+        {
+          "_id": "50f151a8-9193-4469-8c61-76b104775f46",
+          "fieldType": "number",
+          "questionValue": "OGL",
+          "isMandatory": false
+        },
+        {
+          "_id": "1a18449f-28db-45a5-954a-ae6e5337ed6a",
+          "fieldType": "single-line",
+          "questionValue": "Remarks",
+          "isMandatory": false
+        }
+      ],
+      "rowFields": []
+    },
+    {
+      "_id": "d23a6a6c-4baf-41e0-9e30-7d7b39f73402",
+      "sectionHeading": "GTI Checklist — Footer",
+      "sectionCode": "SECTION_TYPE_BLANK_SECTION",
+      "questionFields": [
+        {
+          "_id": "ce316903-a843-476d-958b-4351d8c4d806",
+          "fieldType": "multi-line",
+          "questionValue": "Remarks if any",
+          "isMandatory": false
+        },
+        {
+          "_id": "57ffd5a9-a014-4cf4-952a-8e30ebff35fc",
+          "fieldType": "users",
+          "questionValue": "Contractor Representative",
+          "isMandatory": false,
+          "viewType": "card",
+          "selectionType": "singleUser"
+        },
+        {
+          "_id": "782e6ef1-6879-458c-9869-955f306f0e2f",
+          "fieldType": "users",
+          "questionValue": "GC/PMC Representative",
+          "isMandatory": false,
+          "viewType": "card",
+          "selectionType": "singleUser"
+        }
+      ]
+    },
+    {
+      "_id": "ba32a556-77d7-432e-8ad5-1c8cc39a06db",
+      "sectionHeading": "Manhole Checklist — Identification",
+      "sectionCode": "SECTION_TYPE_BLANK_SECTION",
+      "questionFields": [
+        {
+          "_id": "d17e5a5b-5a7b-4178-9ed0-1074a6c52d41",
+          "fieldType": "single-line",
+          "questionValue": "Manhole ID",
+          "isMandatory": false
+        },
+        {
+          "_id": "a857a4fd-a304-4691-88af-5726d2ba1732",
+          "fieldType": "date-time",
+          "questionValue": "Date",
+          "isMandatory": false,
+          "displayAs": "dateOnly"
+        },
+        {
+          "_id": "f56f7f52-7ca4-4169-a710-a553c667ef82",
+          "fieldType": "single-line",
+          "questionValue": "Chainage",
+          "isMandatory": false
+        },
+        {
+          "_id": "bc2d671a-6679-4a12-a742-50bb9376b4c7",
+          "fieldType": "number",
+          "questionValue": "Ground Level",
+          "isMandatory": false
+        },
+        {
+          "_id": "cfaa22c8-d292-4551-9112-282ba6006d09",
+          "fieldType": "number",
+          "questionValue": "Invert Level",
+          "isMandatory": false
+        }
+      ]
+    },
+    {
+      "_id": "323856bd-d9cc-45c8-96f7-356f116cf3da",
+      "sectionHeading": "Manhole Checklist — Depth Table",
+      "sectionCode": "SECTION_TYPE_TABLE_SECTION",
+      "columnFields": [
+        {
+          "_id": "8a3148b9-ffde-44be-acef-b5c6f0be55fb",
+          "fieldType": "number",
+          "questionValue": "Depth as per Drawing",
+          "isMandatory": false
+        },
+        {
+          "_id": "17eea1a5-1c29-455f-9e95-8a238795b2ea",
+          "fieldType": "number",
+          "questionValue": "Depth as per Observation",
+          "isMandatory": false
+        },
+        {
+          "_id": "6147edf5-86d6-48f1-8c21-78757c4009e6",
+          "fieldType": "number",
+          "questionValue": "Difference",
+          "fieldInstruction": "in mm",
+          "isMandatory": false
+        }
+      ],
+      "rowFields": []
+    },
+    {
+      "_id": "61e15088-6d41-448d-b2b6-c5ef1a3acd6e",
+      "sectionHeading": "Manhole Checklist — Remarks",
+      "sectionCode": "SECTION_TYPE_BLANK_SECTION",
+      "questionFields": [
+        {
+          "_id": "ea111aa8-32df-4205-9e8d-36388e9a597b",
+          "fieldType": "multi-line",
+          "questionValue": "Remarks if any",
+          "isMandatory": false
+        }
+      ]
+    },
+    {
+      "_id": "1894934d-9c39-445b-b01b-16d671975556",
+      "sectionHeading": "Contractor's Representative",
+      "sectionCode": "SECTION_TYPE_BLANK_SECTION",
+      "questionFields": [
+        {
+          "_id": "d6a689ce-a838-4b8c-acfd-693ec77bec1f",
+          "fieldType": "single-line",
+          "questionValue": "Name",
+          "isMandatory": false
+        },
+        {
+          "_id": "4b8e3741-f1f9-4e1a-81a6-fa30944bdd6c",
+          "fieldType": "single-line",
+          "questionValue": "Position",
+          "isMandatory": false
+        },
+        {
+          "_id": "ee0e2232-fcb9-4226-aa67-f27f70f7b0b5",
+          "fieldType": "date-time",
+          "questionValue": "Date & Time",
+          "isMandatory": false,
+          "displayAs": "dateAndTime"
+        },
+        {
+          "_id": "99e8bab0-b92d-4d77-8ee5-13b1f42e80b3",
+          "fieldType": "users",
+          "questionValue": "Signature",
+          "isMandatory": false,
+          "viewType": "card",
+          "selectionType": "singleUser"
+        }
+      ]
+    },
+    {
+      "_id": "d1e7e194-944f-4306-be57-d7944ca97480",
+      "sectionHeading": "GC/PMC Representative",
+      "sectionCode": "SECTION_TYPE_BLANK_SECTION",
+      "questionFields": [
+        {
+          "_id": "d6a689ce-a838-4b8c-acfd-693ec77bec1f",
+          "fieldType": "single-line",
+          "questionValue": "Name",
+          "isMandatory": false
+        },
+        {
+          "_id": "4b8e3741-f1f9-4e1a-81a6-fa30944bdd6c",
+          "fieldType": "single-line",
+          "questionValue": "Position",
+          "isMandatory": false
+        },
+        {
+          "_id": "ee0e2232-fcb9-4226-aa67-f27f70f7b0b5",
+          "fieldType": "date-time",
+          "questionValue": "Date & Time",
+          "isMandatory": false,
+          "displayAs": "dateAndTime"
+        },
+        {
+          "_id": "99e8bab0-b92d-4d77-8ee5-13b1f42e80b3",
+          "fieldType": "users",
+          "questionValue": "Signature",
+          "isMandatory": false,
+          "viewType": "card",
+          "selectionType": "singleUser"
+        }
+      ]
+    },
+    {
+      "_id": "0f74420a-083d-4e99-9506-f40adff6f1e1",
+      "sectionHeading": "Pile Checklist — Header",
+      "sectionCode": "SECTION_TYPE_BLANK_SECTION",
+      "questionFields": [
+        {
+          "_id": "8a5366dc-8fe7-41bd-8973-3d2a75bf513a",
+          "fieldType": "date-time",
+          "questionValue": "Date",
+          "isMandatory": false,
+          "displayAs": "dateOnly"
+        },
+        {
+          "_id": "40dfdc60-89ee-44c8-89fd-0c5e4c691f2f",
+          "fieldType": "single-line",
+          "questionValue": "Pier ID",
+          "isMandatory": false
+        },
+        {
+          "_id": "72cd7d4f-5317-49d0-9f44-531d54de9268",
+          "fieldType": "single-line",
+          "questionValue": "Reference Point",
+          "isMandatory": false
+        }
+      ]
+    },
+    {
+      "_id": "6047cdff-584e-48bf-9d08-47360f73cb6f",
+      "sectionHeading": "Pile Checklist — Co-ordinate Table",
+      "sectionCode": "SECTION_TYPE_TABLE_SECTION",
+      "columnFields": [
+        {
+          "_id": "4cb23e5a-848c-4a12-90e6-7c03de9467e1",
+          "fieldType": "number",
+          "questionValue": "Sl. No.",
+          "isMandatory": false
+        },
+        {
+          "_id": "474ed498-f367-4e2b-89ed-66c512aa2a55",
+          "fieldType": "single-line",
+          "questionValue": "Pile ID",
+          "isMandatory": false
+        },
+        {
+          "_id": "c609b502-ee93-4357-b9a0-d3891ebd5663",
+          "fieldType": "number",
+          "fieldLabel": "Drawing Co-ordinate",
+          "questionValue": "Easting",
+          "isMandatory": false
+        },
+        {
+          "_id": "858b3455-d4c0-4038-869a-c16e0f4d7221",
+          "fieldType": "number",
+          "fieldLabel": "Drawing Co-ordinate",
+          "questionValue": "Northing",
+          "isMandatory": false
+        },
+        {
+          "_id": "b2515230-02d7-4a34-923f-feb2cb0d0656",
+          "fieldType": "number",
+          "fieldLabel": "Observe Co-ordinate",
+          "questionValue": "Easting",
+          "isMandatory": false
+        },
+        {
+          "_id": "4f36b8bc-590a-4580-91ee-e8128873d168",
+          "fieldType": "number",
+          "fieldLabel": "Observe Co-ordinate",
+          "questionValue": "Northing",
+          "isMandatory": false
+        },
+        {
+          "_id": "03336968-8012-49b0-bde6-abac69a9c858",
+          "fieldType": "number",
+          "fieldLabel": "Diff",
+          "fieldInstruction": "in mm",
+          "questionValue": "E",
+          "isMandatory": false
+        },
+        {
+          "_id": "f82fd2ee-95dd-4f59-b649-a2cd9cd1e687",
+          "fieldType": "number",
+          "fieldLabel": "Diff",
+          "fieldInstruction": "in mm",
+          "questionValue": "N",
+          "isMandatory": false
+        },
+        {
+          "_id": "50f151a8-9193-4469-8c61-76b104775f46",
+          "fieldType": "number",
+          "questionValue": "OGL",
+          "isMandatory": false
+        },
+        {
+          "_id": "1a18449f-28db-45a5-954a-ae6e5337ed6a",
+          "fieldType": "single-line",
+          "questionValue": "Remarks",
+          "isMandatory": false
+        }
+      ],
+      "rowFields": []
+    },
+    {
+      "_id": "81d9bd37-5529-4934-af4d-7b835af79a7c",
+      "sectionHeading": "Pile Checklist — Footer",
+      "sectionCode": "SECTION_TYPE_BLANK_SECTION",
+      "questionFields": [
+        {
+          "_id": "a3d9263f-1885-4d95-abeb-1dbb9219fbd8",
+          "fieldType": "multi-line",
+          "questionValue": "Remarks if any",
+          "isMandatory": false
+        },
+        {
+          "_id": "b539179c-1e3c-4932-88cc-714953c71c5b",
+          "fieldType": "users",
+          "questionValue": "Contractor Representative",
+          "isMandatory": false,
+          "viewType": "card",
+          "selectionType": "singleUser"
+        },
+        {
+          "_id": "9b43a2f7-1198-48e2-8deb-2ed4c838272b",
+          "fieldType": "users",
+          "questionValue": "GC/PMC Representative",
+          "isMandatory": false,
+          "viewType": "card",
+          "selectionType": "singleUser"
+        }
+      ]
+    },
+    {
+      "_id": "ed8490a5-dfe4-4395-980f-8b1de7239d15",
+      "sectionHeading": "Pile Cap Checklist — Header",
+      "sectionCode": "SECTION_TYPE_BLANK_SECTION",
+      "questionFields": [
+        {
+          "_id": "c7f1dbf8-010b-474e-89ff-1ffaee748a0e",
+          "fieldType": "date-time",
+          "questionValue": "Date",
+          "isMandatory": false,
+          "displayAs": "dateOnly"
+        },
+        {
+          "_id": "40dfdc60-89ee-44c8-89fd-0c5e4c691f2f",
+          "fieldType": "single-line",
+          "questionValue": "Pier ID",
+          "isMandatory": false
+        },
+        {
+          "_id": "f61c9bd5-d318-4405-b372-cad6c17a5b21",
+          "fieldType": "single-line",
+          "questionValue": "Reference Point",
+          "isMandatory": false
+        }
+      ]
+    },
+    {
+      "_id": "9fa7d6ea-c8cf-4137-8c3f-d1c1da712415",
+      "sectionHeading": "Pile Cap Checklist - Co-ordinate Table",
+      "sectionCode": "SECTION_TYPE_TABLE_SECTION",
+      "columnFields": [
+        {
+          "_id": "4cb23e5a-848c-4a12-90e6-7c03de9467e1",
+          "fieldType": "number",
+          "questionValue": "Sl. No.",
+          "isMandatory": false
+        },
+        {
+          "_id": "474ed498-f367-4e2b-89ed-66c512aa2a55",
+          "fieldType": "single-line",
+          "questionValue": "Pile Cap ID",
+          "isMandatory": false
+        },
+        {
+          "_id": "c609b502-ee93-4357-b9a0-d3891ebd5663",
+          "fieldType": "number",
+          "fieldLabel": "Drawing Co-ordinate",
+          "questionValue": "Easting",
+          "isMandatory": false
+        },
+        {
+          "_id": "858b3455-d4c0-4038-869a-c16e0f4d7221",
+          "fieldType": "number",
+          "fieldLabel": "Drawing Co-ordinate",
+          "questionValue": "Northing",
+          "isMandatory": false
+        },
+        {
+          "_id": "b2515230-02d7-4a34-923f-feb2cb0d0656",
+          "fieldType": "number",
+          "fieldLabel": "Observe Co-ordinate",
+          "questionValue": "Easting",
+          "isMandatory": false
+        },
+        {
+          "_id": "4f36b8bc-590a-4580-91ee-e8128873d168",
+          "fieldType": "number",
+          "fieldLabel": "Observe Co-ordinate",
+          "questionValue": "Northing",
+          "isMandatory": false
+        },
+        {
+          "_id": "03336968-8012-49b0-bde6-abac69a9c858",
+          "fieldType": "number",
+          "fieldLabel": "Diff",
+          "fieldInstruction": "in mm",
+          "questionValue": "E",
+          "isMandatory": false
+        },
+        {
+          "_id": "f82fd2ee-95dd-4f59-b649-a2cd9cd1e687",
+          "fieldType": "number",
+          "fieldLabel": "Diff",
+          "fieldInstruction": "in mm",
+          "questionValue": "N",
+          "isMandatory": false
+        },
+        {
+          "_id": "50f151a8-9193-4469-8c61-76b104775f46",
+          "fieldType": "number",
+          "questionValue": "OGL",
+          "isMandatory": false
+        },
+        {
+          "_id": "1a18449f-28db-45a5-954a-ae6e5337ed6a",
+          "fieldType": "single-line",
+          "questionValue": "Remarks",
+          "isMandatory": false
+        }
+      ],
+      "rowFields": []
+    },
+    {
+      "_id": "23bafe8e-4e10-4b61-8004-bc4afcea1efe",
+      "sectionHeading": "Pile Cap Checklist — Footer",
+      "sectionCode": "SECTION_TYPE_BLANK_SECTION",
+      "questionFields": [
+        {
+          "_id": "a3d9263f-1885-4d95-abeb-1dbb9219fbd8",
+          "fieldType": "multi-line",
+          "questionValue": "Remarks if any",
+          "isMandatory": false
+        },
+        {
+          "_id": "b539179c-1e3c-4932-88cc-714953c71c5b",
+          "fieldType": "users",
+          "questionValue": "Contractor Representative",
+          "isMandatory": false,
+          "viewType": "card",
+          "selectionType": "singleUser"
+        },
+        {
+          "_id": "9b43a2f7-1198-48e2-8deb-2ed4c838272b",
+          "fieldType": "users",
+          "questionValue": "GC/PMC Representative",
+          "isMandatory": false,
+          "viewType": "card",
+          "selectionType": "singleUser"
+        }
+      ]
+    },
+    {
+      "_id": "6d727deb-2bb4-4850-aedb-d14664ff70c8",
+      "sectionHeading": "Pier Checklist — Header",
+      "sectionCode": "SECTION_TYPE_BLANK_SECTION",
+      "questionFields": [
+        {
+          "_id": "a3eda988-b8b8-4aec-92ae-ebf24f5f76d4",
+          "fieldType": "date-time",
+          "questionValue": "Date",
+          "isMandatory": false,
+          "displayAs": "dateOnly"
+        },
+        {
+          "_id": "3b885367-f8a7-4dff-aa49-7812347a4766",
+          "fieldType": "single-line",
+          "questionValue": "Pier ID",
+          "isMandatory": false
+        },
+        {
+          "_id": "fead74c8-0daa-41d4-b6cf-32851b8c0ef4",
+          "fieldType": "single-line",
+          "questionValue": "Reference Point",
+          "isMandatory": false
+        }
+      ]
+    },
+    {
+      "_id": "d8012585-ffb5-45ab-95b5-01f8f17ac4eb",
+      "sectionHeading": "Pier Checklist — Co-ordinate Table",
+      "sectionCode": "SECTION_TYPE_TABLE_SECTION",
+      "columnFields": [
+        {
+          "_id": "4cb23e5a-848c-4a12-90e6-7c03de9467e1",
+          "fieldType": "number",
+          "questionValue": "Sl. No.",
+          "isMandatory": false
+        },
+        {
+          "_id": "474ed498-f367-4e2b-89ed-66c512aa2a55",
+          "fieldType": "single-line",
+          "questionValue": "Pier ID",
+          "isMandatory": false
+        },
+        {
+          "_id": "c609b502-ee93-4357-b9a0-d3891ebd5663",
+          "fieldType": "number",
+          "fieldLabel": "Drawing Co-ordinate",
+          "questionValue": "Easting",
+          "isMandatory": false
+        },
+        {
+          "_id": "858b3455-d4c0-4038-869a-c16e0f4d7221",
+          "fieldType": "number",
+          "fieldLabel": "Drawing Co-ordinate",
+          "questionValue": "Northing",
+          "isMandatory": false
+        },
+        {
+          "_id": "b2515230-02d7-4a34-923f-feb2cb0d0656",
+          "fieldType": "number",
+          "fieldLabel": "Observe Co-ordinate",
+          "questionValue": "Easting",
+          "isMandatory": false
+        },
+        {
+          "_id": "4f36b8bc-590a-4580-91ee-e8128873d168",
+          "fieldType": "number",
+          "fieldLabel": "Observe Co-ordinate",
+          "questionValue": "Northing",
+          "isMandatory": false
+        },
+        {
+          "_id": "03336968-8012-49b0-bde6-abac69a9c858",
+          "fieldType": "number",
+          "fieldLabel": "Diff",
+          "fieldInstruction": "in mm",
+          "questionValue": "E",
+          "isMandatory": false
+        },
+        {
+          "_id": "f82fd2ee-95dd-4f59-b649-a2cd9cd1e687",
+          "fieldType": "number",
+          "fieldLabel": "Diff",
+          "fieldInstruction": "in mm",
+          "questionValue": "N",
+          "isMandatory": false
+        },
+        {
+          "_id": "50f151a8-9193-4469-8c61-76b104775f46",
+          "fieldType": "number",
+          "questionValue": "OGL",
+          "isMandatory": false
+        },
+        {
+          "_id": "1a18449f-28db-45a5-954a-ae6e5337ed6a",
+          "fieldType": "single-line",
+          "questionValue": "Remarks",
+          "isMandatory": false
+        }
+      ],
+      "rowFields": []
+    },
+    {
+      "_id": "fe9abe83-2246-423f-9cb9-4c5398e4a994",
+      "sectionHeading": "Pier Checklist - Footer",
+      "sectionCode": "SECTION_TYPE_BLANK_SECTION",
+      "questionFields": [
+        {
+          "_id": "a3d9263f-1885-4d95-abeb-1dbb9219fbd8",
+          "fieldType": "multi-line",
+          "questionValue": "Remarks if any",
+          "isMandatory": false
+        },
+        {
+          "_id": "b539179c-1e3c-4932-88cc-714953c71c5b",
+          "fieldType": "users",
+          "questionValue": "Contractor Representative",
+          "isMandatory": false,
+          "viewType": "card",
+          "selectionType": "singleUser"
+        },
+        {
+          "_id": "9b43a2f7-1198-48e2-8deb-2ed4c838272b",
+          "fieldType": "users",
+          "questionValue": "GC/PMC Representative",
+          "isMandatory": false,
+          "viewType": "card",
+          "selectionType": "singleUser"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,255 @@
+{
+  "template": [
+    {
+      "_id": "5949e50d-d9f5-42bd-a6ee-a64dbec6c94d",
+      "sectionHeading": "Inspection Scope",
+      "sectionCode": "SECTION_TYPE_BLANK_SECTION",
+      "questionFields": [
+        {
+          "_id": "284d7798-f011-4784-a569-b91084fd480e",
+          "fieldType": "multi-select",
+          "fieldLabel": "Label",
+          "questionValue": "Detail area to be inspected",
+          "isMandatory": false,
+          "answerChoices": [
+            "Roads",
+            "Survey",
+            "Tunnel Works",
+            "Geotechnical",
+            "EHS",
+            "Others",
+            "MEP",
+            "Civil Works",
+            "Instrumentation",
+            "Quality"
+          ],
+          "viewType": "list"
+        }
+      ]
+    },
+    {
+      "_id": "4b2a683d-403a-4b21-a6c3-632223769297",
+      "sectionHeading": "RFI Identification",
+      "sectionCode": "SECTION_TYPE_BLANK_SECTION",
+      "questionFields": [
+        {
+          "_id": "ad1cd784-ccdb-452c-8c37-cbf568abd7b8",
+          "fieldType": "single-line",
+          "placeholderText": "L&T/OG/RFI/",
+          "questionValue": "RFI No.",
+          "isMandatory": true
+        },
+        {
+          "_id": "a47b3404-4079-4083-b60a-91b9b93e71d1",
+          "fieldType": "date-time",
+          "questionValue": "Date",
+          "isMandatory": true,
+          "displayAs": "dateOnly"
+        }
+      ]
+    },
+    {
+      "_id": "3a8f0bd3-3983-41f5-837a-bde4cc8d2985",
+      "sectionHeading": "Work Details",
+      "sectionCode": "SECTION_TYPE_BLANK_SECTION",
+      "questionFields": [
+        {
+          "_id": "9609ff5e-7c73-4c12-b727-052ea39300d1",
+          "fieldType": "multi-line",
+          "questionValue": "We request you to kindly arrange for the Inspection/Checking of following works:",
+          "isMandatory": false
+        },
+        {
+          "_id": "68ae419a-108c-40d1-b808-a8513f819947",
+          "fieldType": "single-line",
+          "questionValue": "Contract Item No.",
+          "placeholderText": "Vol-III, Sec-VIII, Appendix-6 Quality Assurance",
+          "isMandatory": false
+        },
+        {
+          "_id": "ece9f41d-08e9-43bf-b721-3423375c7cf6",
+          "fieldType": "single-line",
+          "questionValue": "Drawing No.",
+          "isMandatory": false
+        },
+        {
+          "_id": "39cd8fcb-301b-442c-8426-db51408c32ec",
+          "fieldType": "single-line",
+          "questionValue": "Specification Clause No.",
+          "isMandatory": false
+        },
+        {
+          "_id": "64449650-e14b-4505-af73-a07ae983fe55",
+          "fieldType": "single-line",
+          "questionValue": "Chainage/Location",
+          "isMandatory": false
+        },
+        {
+          "_id": "310a8f98-1ce8-49f1-b3f8-1d2ed70b9b18",
+          "fieldType": "single-line",
+          "questionValue": "ITP/Hold point details",
+          "isMandatory": false
+        },
+        {
+          "_id": "d2707dfd-c525-4b11-a830-704cea1ce9fe",
+          "fieldType": "single-select",
+          "questionValue": "Safety Precaution taken",
+          "isMandatory": false,
+          "answerChoices": [
+            "Yes",
+            "No"
+          ],
+          "viewType": "list"
+        },
+        {
+          "_id": "49f05e25-3a1a-42b5-a19f-1f89a6facfb1",
+          "fieldType": "single-select",
+          "questionValue": "Check list to be enclosed",
+          "isMandatory": false,
+          "answerChoices": [
+            "Yes",
+            "No"
+          ],
+          "viewType": "list"
+        }
+      ]
+    },
+    {
+      "_id": "aac322d1-3c14-43f7-b8ac-4bda2a20dab8",
+      "sectionHeading": "Signatures",
+      "sectionCode": "SECTION_TYPE_TABLE_SECTION",
+      "columnFields": [
+        {
+          "_id": "e556e821-ebfd-4092-aaa7-cfe6128143f4",
+          "questionValue": "Raised by Execution representative (L&T)"
+        },
+        {
+          "_id": "2e3034f9-243e-4337-bb74-5a34116aeafc",
+          "questionValue": "Verified by QA/QC representative (L&T)"
+        },
+        {
+          "_id": "3b57d58e-bf84-462d-8b37-d54c3b0225a0",
+          "questionValue": "Verified by Safety representative (L&T)"
+        },
+        {
+          "_id": "0f9fa20e-2a25-42cb-b872-a2751b5275be",
+          "questionValue": "Received by PMC representative"
+        }
+      ],
+      "rowFields": [
+        {
+          "_id": "64af4543-4293-4947-97a5-aba6748e467d",
+          "fieldType": "users",
+          "questionValue": "Signature with Date",
+          "isMandatory": false,
+          "viewType": "card",
+          "selectionType": "singleUser"
+        },
+        {
+          "_id": "2bbbbfc0-5091-4597-beb9-86073fd01e8c",
+          "fieldType": "single-line",
+          "questionValue": "Name",
+          "isMandatory": false
+        },
+        {
+          "_id": "ab5ac19d-2b36-45f4-b6d3-f4e91bf87079",
+          "fieldType": "single-line",
+          "questionValue": "Designation",
+          "isMandatory": false
+        }
+      ]
+    },
+    {
+      "_id": "5679cbde-001b-4ad8-8a75-68f514e3f08a",
+      "sectionHeading": "Enclosures",
+      "sectionCode": "SECTION_TYPE_BLANK_SECTION",
+      "questionFields": [
+        {
+          "_id": "fba174fc-26ff-4fb3-a293-67644110c35c",
+          "fieldType": "multi-line",
+          "questionValue": "Enclosures",
+          "isMandatory": false
+        }
+      ]
+    },
+    {
+      "_id": "df84264d-413c-475f-96dc-c325b7d6e6ed",
+      "sectionHeading": "Comments/Recommendations of Engineer",
+      "sectionCode": "SECTION_TYPE_BLANK_SECTION",
+      "questionFields": [
+        {
+          "_id": "fd95d6f2-0ab6-4a1b-a046-fe606b3428a9",
+          "fieldType": "multi-line",
+          "questionValue": "Engineers OBJECTION / NOTICE TO PROCEED",
+          "isMandatory": false
+        },
+        {
+          "_id": "91d45a3b-4cf1-4d09-a244-05d321a4fc99",
+          "fieldType": "single-select",
+          "questionValue": "Inspection Status",
+          "isMandatory": false,
+          "answerChoices": [
+            "APPROVED",
+            "APPROVED WITH COMMENTS",
+            "NOT APPROVED"
+          ],
+          "viewType": "list"
+        }
+      ]
+    },
+    {
+      "_id": "696e9492-f411-4991-8f64-0a543791178f",
+      "sectionHeading": "L&T Representative",
+      "sectionCode": "SECTION_TYPE_BLANK_SECTION",
+      "questionFields": [
+        {
+          "_id": "1eaa8af3-8a24-44c9-92b5-dae1469fa99f",
+          "fieldType": "date-time",
+          "questionValue": "Signature with Date",
+          "isMandatory": false,
+          "viewType": "card",
+          "selectionType": "singleUser"
+        },
+        {
+          "_id": "ff8c391d-597a-4d68-9419-1cf5ad1a2da1",
+          "fieldType": "single-line",
+          "questionValue": "Name",
+          "isMandatory": false
+        },
+        {
+          "_id": "80f53e7d-9aec-4ee7-8942-e90e6a1192dd",
+          "fieldType": "single-line",
+          "questionValue": "Designation",
+          "isMandatory": false
+        }
+      ]
+    },
+    {
+      "_id": "d93dc8e7-7659-4739-a1f5-3e2a106407ee",
+      "sectionHeading": "PMC Representative",
+      "sectionCode": "SECTION_TYPE_BLANK_SECTION",
+      "questionFields": [
+        {
+          "_id": "8303f696-46e1-4007-844a-b54e6bc90a70",
+          "fieldType": "date-time",
+          "questionValue": "Signature with Date",
+          "isMandatory": false,
+          "viewType": "card",
+          "selectionType": "singleUser"
+        },
+        {
+          "_id": "9be2d08f-e022-4296-ae4b-c4ab80ad3e19",
+          "fieldType": "single-line",
+          "questionValue": "Name",
+          "isMandatory": true
+        },
+        {
+          "_id": "5264883b-e808-473f-bbe4-a232eb1b3825",
+          "fieldType": "single-line",
+          "questionValue": "Designation",
+          "isMandatory": true
+        }
+      ]
+    }
+  ]
+}

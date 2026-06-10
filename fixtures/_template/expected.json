@@ -1,18 +1,51 @@
 {
-  "name": "Example Form",
-  "description": "",
   "template": [
     {
-      "_id": "11111111-1111-1111-1111-111111111111",
+      "_id": "11111111-1111-4111-8111-111111111111",
       "sectionHeading": "Header",
       "sectionCode": "SECTION_TYPE_BLANK_SECTION",
       "questionFields": [
         {
-          "_id": "22222222-2222-2222-2222-222222222222",
+          "_id": "22222222-2222-4222-8222-222222222222",
           "fieldType": "single-line",
           "fieldLabel": "Label",
           "questionValue": "Full Name",
           "isMandatory": true
+        }
+      ]
+    },
+    {
+      "_id": "33333333-3333-4333-8333-333333333333",
+      "sectionHeading": "Signatures (example table — rows are the fields, columns name the signers)",
+      "sectionCode": "SECTION_TYPE_TABLE_SECTION",
+      "columnFields": [
+        { "_id": "44444444-4444-4444-8444-444444444441", "questionValue": "Inspector" },
+        { "_id": "44444444-4444-4444-8444-444444444442", "questionValue": "Approver" }
+      ],
+      "rowFields": [
+        {
+          "_id": "55555555-5555-4555-8555-555555555551",
+          "fieldType": "single-line",
+          "fieldLabel": "Label",
+          "questionValue": "Name",
+          "isMandatory": false
+        },
+        {
+          "_id": "55555555-5555-4555-8555-555555555552",
+          "fieldType": "date-time",
+          "fieldLabel": "Label",
+          "questionValue": "Date & Time",
+          "isMandatory": false,
+          "displayAs": "dateAndTime"
+        },
+        {
+          "_id": "55555555-5555-4555-8555-555555555553",
+          "fieldType": "users",
+          "fieldLabel": "Label",
+          "questionValue": "Signature",
+          "isMandatory": false,
+          "viewType": "card",
+          "selectionType": "singleUser"
         }
       ]
     }

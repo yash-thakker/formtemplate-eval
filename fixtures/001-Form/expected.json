@@ -1,0 +1,374 @@
+{
+  "template": [
+    {
+      "_id": "4b56953e-7015-46ab-a0d5-8b4b080f25ee",
+      "sectionHeading": "Request Details",
+      "sectionCode": "SECTION_TYPE_BLANK_SECTION",
+      "questionFields": [
+        {
+          "_id": "762007de-5b3d-40fb-92da-799567bf9149",
+          "fieldType": "single-line",
+          "questionValue": "RFI No./Revision No.",
+          "isMandatory": false
+        },
+        {
+          "_id": "1da5f904-9bee-451d-98bf-20e782bc7237",
+          "fieldType": "date-time",
+          "questionValue": "Submission Date",
+          "displayAs": "dateOnly",
+          "isMandatory": false
+        },
+        {
+          "_id": "675312f1-3f00-4c57-b9be-f0b91a977223",
+          "fieldType": "single-line",
+          "questionValue": "Submission Time",
+          "isMandatory": false
+        },
+        {
+          "_id": "9a411e8e-764c-4c7a-b970-82df2ee515f7",
+          "fieldType": "date-time",
+          "questionValue": "Inspection Date",
+          "displayAs": "dateOnly",
+          "isMandatory": false
+        },
+        {
+          "_id": "6d374873-3497-48be-83bf-56c79c309def",
+          "fieldType": "single-line",
+          "questionValue": "Inspection Time",
+          "isMandatory": false
+        }
+      ]
+    },
+    {
+      "_id": "a43f2506-1754-4963-b25b-350ddbd4751f",
+      "sectionHeading": "Work Details",
+      "sectionCode": "SECTION_TYPE_BLANK_SECTION",
+      "questionFields": [
+        {
+          "_id": "c3403d5e-89d8-4beb-be1d-7bc4a6bf9d6b",
+          "fieldType": "single-line",
+          "questionValue": "Activity",
+          "isMandatory": false
+        },
+        {
+          "_id": "c0b0ab85-a23a-4786-bccb-6b6e83362c76",
+          "fieldType": "single-line",
+          "questionValue": "Chainage/Location/Site",
+          "isMandatory": false
+        },
+        {
+          "_id": "a0d25a67-93e9-4db6-b94e-26443b94c4e5",
+          "fieldType": "multi-line",
+          "questionValue": "Brief Description of works",
+          "isMandatory": false
+        },
+        {
+          "_id": "c7f2583c-1d8e-4819-8050-ed4b647f5ab6",
+          "fieldType": "single-line",
+          "questionValue": "Drawing No.",
+          "isMandatory": false
+        },
+        {
+          "_id": "a3b23d08-dae8-45ef-a4d3-69d9df6c492a",
+          "fieldType": "single-line",
+          "questionValue": "Contract item No./Specification Clause no./ITP/Hold Point details",
+          "isMandatory": false
+        },
+        {
+          "_id": "a2f875a3-684b-4719-ad26-0f0252fbf076",
+          "fieldType": "single-line",
+          "questionValue": "Specific area and details that are requested to be inspected",
+          "isMandatory": false
+        }
+      ]
+    },
+    {
+      "_id": "3fcabad7-44ce-483f-8501-48f3212f42da",
+      "sectionHeading": "Requested by",
+      "sectionCode": "SECTION_TYPE_BLANK_SECTION",
+      "questionFields": [
+        {
+          "_id": "2a3cdb29-fbea-42b3-be58-5f51c40296ea",
+          "fieldType": "single-line",
+          "questionValue": "Name",
+          "isMandatory": false
+        },
+        {
+          "_id": "93b03ed6-15f4-4ede-ae3b-26369d4a4514",
+          "fieldType": "single-line",
+          "questionValue": "Position",
+          "isMandatory": false
+        },
+        {
+          "_id": "d755624e-ece6-450e-bb44-8c68a5313fe7",
+          "fieldType": "date-time",
+          "questionValue": "Date & Time",
+          "isMandatory": false,
+          "displayAs": "dateAndTime"
+        },
+        {
+          "_id": "1f1da201-7852-4811-8684-b47624f96017",
+          "fieldType": "users",
+          "questionValue": "Signature",
+          "isMandatory": false,
+          "viewType": "card",
+          "selectionType": "singleUser"
+        }
+      ]
+    },
+    {
+      "_id": "39326e0e-7c77-4975-8ebc-9d640ccf7101",
+      "sectionHeading": "RFI Received by",
+      "sectionCode": "SECTION_TYPE_BLANK_SECTION",
+      "questionFields": [
+        {
+          "_id": "907c7637-aa82-470d-b175-676d6121c1d0",
+          "fieldType": "single-line",
+          "questionValue": "Name",
+          "isMandatory": false
+        },
+        {
+          "_id": "bc6645c1-749a-4874-b884-21614ae83ab3",
+          "fieldType": "single-line",
+          "questionValue": "Position",
+          "isMandatory": false
+        },
+        {
+          "_id": "88d4df1e-d691-48e8-9aaf-11ba18fc54c8",
+          "fieldType": "date-time",
+          "questionValue": "Date & Time",
+          "isMandatory": false,
+          "displayAs": "dateAndTime"
+        },
+        {
+          "_id": "7e62848a-69c2-4bc7-9c36-b75b894bbd0e",
+          "fieldType": "users",
+          "questionValue": "Signature",
+          "isMandatory": false,
+          "viewType": "card",
+          "selectionType": "singleUser"
+        }
+      ]
+    },
+    {
+      "_id": "beb9dd74-9c14-4f41-8ca1-b4dbb5cf40a5",
+      "sectionHeading": "Enclosures",
+      "sectionCode": "SECTION_TYPE_BLANK_SECTION",
+      "questionFields": [
+        {
+          "_id": "f4cc02fc-aa75-4c8a-85be-83172fed095a",
+          "fieldType": "multi-select",
+          "questionValue": "Enclosure:",
+          "fieldInstruction": "Attach QA/QC form /Check list etc appropriate to Inspection",
+          "isMandatory": false,
+          "answerChoices": [
+            "Level Sheet",
+            "Material Test Report",
+            "Concrete Pour Card",
+            "Others",
+            "Reinf Checklist/BBS",
+            "Formwork Checklist",
+            "Pre Concrete",
+            "Post Concrete"
+          ],
+          "viewType": "list"
+        },
+        {
+          "_id": "8583a01a-05cf-45b9-92c5-53507bf1d0e3",
+          "fieldType": "single-line",
+          "questionValue": "Approved WMS / Checklist",
+          "isMandatory": false
+        }
+      ]
+    },
+    {
+      "_id": "fe097e9d-edc6-4865-8cf9-dcb68294450c",
+      "sectionHeading": "Safety Checked by",
+      "sectionCode": "SECTION_TYPE_BLANK_SECTION",
+      "questionFields": [
+        {
+          "_id": "90bb3cde-33ab-4300-96f8-29ec2a7f6027",
+          "fieldType": "single-line",
+          "questionValue": "Name",
+          "isMandatory": false
+        },
+        {
+          "_id": "3eb16f0c-43a7-4ab6-81a8-3cb19c9876c4",
+          "fieldType": "single-line",
+          "questionValue": "Position",
+          "isMandatory": false
+        },
+        {
+          "_id": "d76794d0-e3ad-451a-8a98-1a4f289e14ed",
+          "fieldType": "date-time",
+          "questionValue": "Date & Time",
+          "isMandatory": false,
+          "displayAs": "dateAndTime"
+        },
+        {
+          "_id": "1e334c00-5fcb-4727-a410-373d11e03c6d",
+          "fieldType": "users",
+          "questionValue": "Signature",
+          "isMandatory": false,
+          "viewType": "card",
+          "selectionType": "singleUser"
+        }
+      ]
+    },
+    {
+      "_id": "539d2518-a13c-46ba-a980-a30448f23b25",
+      "sectionHeading": "QA/QC Checked by",
+      "sectionCode": "SECTION_TYPE_BLANK_SECTION",
+      "questionFields": [
+        {
+          "_id": "7143a403-27d8-4521-8cdf-66dc3f152706",
+          "fieldType": "single-line",
+          "questionValue": "Name",
+          "isMandatory": false
+        },
+        {
+          "_id": "94156c30-96b1-4c94-94f7-581045d8b1e8",
+          "fieldType": "single-line",
+          "questionValue": "Position",
+          "isMandatory": false
+        },
+        {
+          "_id": "8d0e146b-4f33-4e22-ba2c-9e0e0d6fbb99",
+          "fieldType": "date-time",
+          "questionValue": "Date & Time",
+          "isMandatory": false,
+          "displayAs": "dateAndTime"
+        },
+        {
+          "_id": "91aa3ea9-4c1b-48be-b690-f707ae9ebd8d",
+          "fieldType": "users",
+          "questionValue": "Signature",
+          "isMandatory": false,
+          "viewType": "card",
+          "selectionType": "singleUser"
+        }
+      ]
+    },
+    {
+      "_id": "f9e4636e-9611-4532-a56c-32df778c31ca",
+      "sectionHeading": "Comments / Recommendations of Engineer",
+      "sectionCode": "SECTION_TYPE_BLANK_SECTION",
+      "questionFields": [
+        {
+          "_id": "169ad41f-6b98-460c-b431-8cced12579d5",
+          "fieldType": "single-select",
+          "questionValue": "Inspection Status",
+          "isMandatory": true,
+          "answerChoices": [
+            "Approved",
+            "Approved With Comment",
+            "Not Approved"
+          ],
+          "viewType": "list"
+        },
+        {
+          "_id": "4909cfb5-5b68-4888-b688-9e9f3a5153f0",
+          "fieldType": "multi-line",
+          "fieldInstruction": "Provide details of OBJECTION",
+          "questionValue": "Engineer's REMARK/OBJECTION: NOTICE TO PROCEED",
+          "isMandatory": false
+        }
+      ]
+    },
+    {
+      "_id": "9780da8b-1f83-49b4-a438-107b87eab8fe",
+      "sectionHeading": "Contractor's Representative",
+      "sectionCode": "SECTION_TYPE_BLANK_SECTION",
+      "questionFields": [
+        {
+          "_id": "39ef8ef1-09d8-48ad-bb3e-783f9e8e9d75",
+          "fieldType": "single-line",
+          "questionValue": "Name",
+          "isMandatory": false
+        },
+        {
+          "_id": "196d95a5-5728-45be-8366-9026c12504c5",
+          "fieldType": "single-line",
+          "questionValue": "Position",
+          "isMandatory": false
+        },
+        {
+          "_id": "03d125d3-31d4-4443-9696-bff8c35045f0",
+          "fieldType": "date-time",
+          "questionValue": "Date & Time",
+          "isMandatory": false,
+          "displayAs": "dateAndTime"
+        },
+        {
+          "_id": "9bd92dbb-7386-421d-9dd0-6d86f663aac1",
+          "fieldType": "users",
+          "questionValue": "Signature",
+          "isMandatory": false,
+          "viewType": "card",
+          "selectionType": "singleUser"
+        }
+      ]
+    },
+    {
+      "_id": "02edeed0-2c44-42b9-b51f-d86d59ec9539",
+      "sectionHeading": "BMC/GC/PMC Representative",
+      "sectionCode": "SECTION_TYPE_TABLE_SECTION",
+      "columnFields": [
+        {
+          "_id": "5e7d24ae-2f14-45b0-a3ed-9870037be83b",
+          "questionValue": "BMC"
+        },
+        {
+          "_id": "c02c4564-fb2e-4da5-beab-acab9ed6de3d",
+          "questionValue": "GC"
+        },
+        {
+          "_id": "c3050a08-b725-4cb5-9b24-7c005317963a",
+          "questionValue": "PMC"
+        }
+      ],
+      "rowFields": [
+        {
+          "_id": "bfc0c17f-8c3c-4965-a18c-203edd6e1b5b",
+          "fieldType": "single-line",
+          "questionValue": "Name",
+          "isMandatory": false
+        },
+        {
+          "_id": "444c10ec-aef7-4315-8b0c-3421cb2054a0",
+          "fieldType": "single-line",
+          "questionValue": "Position",
+          "isMandatory": false
+        },
+        {
+          "_id": "89777157-9986-45b8-9038-34dd3696e246",
+          "fieldType": "date-time",
+          "questionValue": "Date & Time",
+          "isMandatory": false,
+          "displayAs": "dateAndTime"
+        },
+        {
+          "_id": "c6095082-851d-4b79-9426-cec8b99b5637",
+          "fieldType": "users",
+          "questionValue": "Signature",
+          "isMandatory": false,
+          "viewType": "card",
+          "selectionType": "singleUser"
+        }
+      ]
+    },
+    {
+      "_id": "9472f67a-1b7f-4d3d-ad69-dce2484c16fc",
+      "sectionHeading": "Acknowledgement",
+      "sectionCode": "SECTION_TYPE_BLANK_SECTION",
+      "questionFields": [
+        {
+          "_id": "39da30aa-f5f4-4b10-be68-6b1a26da931f",
+          "fieldType": "single-line",
+          "questionValue": "Received Copy by contractor's Representative",
+          "isMandatory": false
+        }
+      ]
+    }
+  ]
+}

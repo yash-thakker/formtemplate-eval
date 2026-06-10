@@ -1,0 +1,6 @@
+{
+  "id": "003-Form",
+  "name": "MCRN Inspection Checklist Booklet (25 pages)",
+  "notes": "25-page multi-checklist booklet for Mumbai Coastal Road North Package A. Pages cycle through GTI / Manhole / Pile / Pile Cap / Pier checklists with similar coordinate-table structures. The rough expected.json captures one of each unique checklist type — audit whether the booklet should actually be modeled as one form (multiple sections) or split into separate fixtures per checklist type. NOTE: Sarvam has a 10-page limit; sarvam-* adapters will fail on this fixture. Useful for LLM adapters with PDF support.",
+  "language": "en-IN"
+}
