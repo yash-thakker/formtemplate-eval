@@ -47,33 +47,9 @@ export const FieldTypeEnum = z.enum([
 export type FieldType = z.infer<typeof FieldTypeEnum>;
 
 /**
- * Render style for select-like questions. On PDFs the platform's `dropDown`
- * style is invisible, so always default to `list` unless the form clearly
- * implies a dropdown.
- */
-export const SelectViewType = z.enum(['list', 'dropDown']);
-
-/**
  * What a `look-up` field is pointing at. Rare on PDFs.
  */
 export const LookUpAnsFieldType = z.enum(['Location', 'Teams']);
-
-/**
- * `date-time` granularity. Default to `dateOnly` unless the form clearly
- * asks for a time of day.
- */
-export const DateTimeDisplayAs = z.enum(['dateOnly', 'dateAndTime']);
-
-/**
- * Render style for a `users` (signature / signee) question. PDFs don't
- * distinguish — default to the platform's `card`.
- */
-export const UsersViewType = z.enum(['card', 'chip']);
-
-/**
- * Whether a `users` question collects one signee or many.
- */
-export const UsersSelectionType = z.enum(['singleUser', 'multipleUser']);
 
 // ---------------------------------------------------------------------------
 // Common question-field shape (shared by every fieldType variant)
@@ -83,27 +59,27 @@ export const UsersSelectionType = z.enum(['singleUser', 'multipleUser']);
  * Fields shared by every question regardless of `fieldType`.
  *
  * Extraction guidance:
- *   - `_id`: generate a fresh UUID for every question. Not parsed from form.
- *   - `fieldLabel`: a UI label string (the platform shows it next to the
- *     input). On PDFs this is usually not visible content
+ *   - `_id`: any non-empty identifier for the question. Not parsed from form.
  *   - `questionValue`: ⭐ the actual question text printed on the form
  *     (e.g., "Date of incident", "Employee full name"). THIS IS THE MOST
  *     IMPORTANT FIELD — extract verbatim where possible.
  *   - `isMandatory`: true ONLY when the form explicitly indicates required
- *     (asterisk, bold "required", "must", etc). Default false otherwise.
+ *     (asterisk, bold "required", "must", etc). False otherwise.
  *   - `placeholderText`: greyed-out hint text inside an input box.
  *     Physical / PDF forms almost never have this — omit if not visible.
  *   - `fieldInstruction`: helper text near the question, often in
  *     parentheses or italics, telling the user what to fill in. Omit if
  *     absent.
+ *
+ * Note: the platform's runtime FormTemplate has a `fieldLabel` UI hint per
+ * question (always "Label" on PDF imports). It's dropped from the eval
+ * schema since (a) no extractor produces a meaningful value, (b) it's not
+ * scored, and (c) keeping it forced OpenAI strict-mode incompatibilities.
  */
 const commonQuestionFields = {
-  _id: z.string().uuid(),
-  fieldLabel: z.string().default('Label'),
+  _id: z.string().min(1),
   questionValue: z.string(),
-  isMandatory: z.boolean().default(false),
-  placeholderText: z.string().optional(),
-  fieldInstruction: z.string().optional(),
+  isMandatory: z.boolean(),
 };
 
 // ---------------------------------------------------------------------------
@@ -125,23 +101,22 @@ export const MultiLineFieldSchema = z.object({
 /**
  * Pick exactly one option from a list (radio buttons / circles).
  * `answerChoices` is the printed list of options.
+ *
+ * The platform's runtime schema also carries a `viewType` UI hint (list /
+ * dropDown) — it's dropped from the eval schema: on PDFs it's always
+ * implicitly `list`, models drop it inconsistently, and nothing scores it.
  */
 export const SingleSelectFieldSchema = z.object({
   ...commonQuestionFields,
   fieldType: z.literal('single-select'),
   answerChoices: z.array(z.string()).min(1),
-  viewType: SelectViewType.default('list'),
 });
 
-/**
- * Pick one or more options from a list (checkbox list).
- * `answerChoices` is the printed list of options.
- */
+/** Same as single-select, multiple choices allowed. */
 export const MultiSelectFieldSchema = z.object({
   ...commonQuestionFields,
   fieldType: z.literal('multi-select'),
   answerChoices: z.array(z.string()).min(1),
-  viewType: SelectViewType.default('list'),
 });
 
 /** Numeric-only answer (count, quantity, currency, etc). */
@@ -160,22 +135,25 @@ export const LookUpFieldSchema = z.object({
   lookUpAnsFieldType: LookUpAnsFieldType,
 });
 
-/** Date, with or without time. Default granularity is `dateOnly`. */
+/**
+ * Date question. The platform's runtime schema also carries `displayAs`
+ * (dateOnly / dateAndTime) — dropped from the eval schema. Models drop it
+ * inconsistently and nothing scores it.
+ */
 export const DateTimeFieldSchema = z.object({
   ...commonQuestionFields,
   fieldType: z.literal('date-time'),
-  displayAs: DateTimeDisplayAs.default('dateOnly'),
 });
 
 /**
  * A person — this is the PDF signature equivalent on the platform.
- * Use this for "Signature", "Signed by", "Inspector", etc.
+ * The runtime schema carries `viewType` (card / chip) and `selectionType`
+ * (singleUser / multipleUser). Dropped from the eval schema for the same
+ * reason as the others: nothing scores them, models drop them inconsistently.
  */
 export const UsersFieldSchema = z.object({
   ...commonQuestionFields,
   fieldType: z.literal('users'),
-  viewType: UsersViewType.default('card'),
-  selectionType: UsersSelectionType.default('singleUser'),
 });
 
 /** Attach a file. Digital-native; rare on physical forms. */
@@ -243,7 +221,7 @@ export type QuestionField = z.infer<typeof QuestionFieldSchema>;
  * no fieldType, no isMandatory, no fieldLabel.
  */
 export const ColumnHeaderSchema = z.object({
-  _id: z.string().uuid(),
+  _id: z.string().min(1),
   questionValue: z.string(),
 });
 export type ColumnHeader = z.infer<typeof ColumnHeaderSchema>;
@@ -267,7 +245,7 @@ export function isTypedEntry(entry: ColumnEntry | QuestionField): entry is Quest
  * only when the form has an actual grid of inputs (rows × columns).
  */
 export const BlankSectionSchema = z.object({
-  _id: z.string().uuid(),
+  _id: z.string().min(1),
   sectionHeading: z.string(),
   sectionCode: z.literal('SECTION_TYPE_BLANK_SECTION'),
   questionFields: z.array(QuestionFieldSchema),
@@ -297,7 +275,7 @@ export type BlankSection = z.infer<typeof BlankSectionSchema>;
  *      that extractors should default to (2) for ambiguous cases.
  */
 export const TableSectionSchema = z.object({
-  _id: z.string().uuid(),
+  _id: z.string().min(1),
   sectionHeading: z.string(),
   sectionCode: z.literal('SECTION_TYPE_TABLE_SECTION'),
   columnFields: z.array(ColumnEntrySchema),

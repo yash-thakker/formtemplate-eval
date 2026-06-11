@@ -31,6 +31,7 @@ export async function runSingle(
       metrics: { latencyMs: 0, costUsd: 0 },
       status: e.message.toLowerCase().includes('timeout') ? 'timeout' : 'crashed',
       errorMessage: e.message,
+      extracted: null,
     };
   }
 
@@ -42,6 +43,7 @@ export async function runSingle(
       metrics: result.metrics,
       status: result.error?.message.toLowerCase().includes('timeout') ? 'timeout' : 'schema_invalid',
       errorMessage: result.error?.message,
+      extracted: null,
     };
   }
 
@@ -52,5 +54,6 @@ export async function runSingle(
     scores,
     metrics: result.metrics,
     status: 'ok',
+    extracted: result.result,
   };
 }

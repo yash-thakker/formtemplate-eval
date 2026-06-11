@@ -50,25 +50,18 @@ function buildQuestion(
   questionValue: string,
   fieldType: FieldType,
 ): QuestionField {
-  const base = {
-    _id: randomUUID(),
-    fieldLabel: 'Label',
-    questionValue,
-    isMandatory: false,
-  };
+  const base = { _id: randomUUID(), questionValue, isMandatory: false };
   switch (fieldType) {
     case 'single-select':
     case 'multi-select':
-      return { ...base, fieldType, answerChoices: ['Yes', 'No'], viewType: 'list' };
-    case 'date-time':
-      return { ...base, fieldType, displayAs: 'dateOnly' };
-    case 'users':
-      return { ...base, fieldType, viewType: 'card', selectionType: 'singleUser' };
+      return { ...base, fieldType, answerChoices: ['Yes', 'No'] };
     case 'look-up':
       return { ...base, fieldType, lookUpAnsFieldType: 'Location' };
     case 'single-line':
     case 'multi-line':
     case 'number':
+    case 'date-time':
+    case 'users':
     case 'fileUpload':
     case 'image':
     case 'geoLocation':

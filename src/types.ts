@@ -85,6 +85,8 @@ export interface BenchmarkRow {
   metrics: AdapterMetrics;
   status: RunStatus;
   errorMessage?: string;
+  /** Parsed template the adapter produced (null on schema_invalid / crashed / timeout). */
+  extracted: FormTemplate | null;
 }
 
 export interface Fixture {

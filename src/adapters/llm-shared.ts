@@ -17,6 +17,8 @@ export interface RunLLMArgs {
   contextText?: string;
   /** Whether to also pass page images. Set false for pure text-context adapters. */
   attachPdf?: boolean;
+  /** Forwarded to generateObject as providerOptions — e.g. { openai: { reasoningEffort: 'minimal' } }. */
+  providerOptions?: Record<string, Record<string, string | number | boolean | null>>;
 }
 
 export async function runLLMExtraction(args: RunLLMArgs, _meta: FixtureMeta): Promise<AdapterResult> {
@@ -37,8 +39,13 @@ export async function runLLMExtraction(args: RunLLMArgs, _meta: FixtureMeta): Pr
       model: args.model,
       schema: FormTemplateSchema,
       maxRetries: 2,
+      // Higher cap so large forms (003) don't get cut off mid-JSON. Default
+      // is provider-specific (Anthropic = 4096) which is too low for fully
+      // structured templates.
+      maxTokens: 16_000,
       system: TEMPLATE_EXTRACTION_SYSTEM,
       messages: [userMessage],
+      providerOptions: args.providerOptions ?? {},
     });
 
     const latencyMs = performance.now() - start;

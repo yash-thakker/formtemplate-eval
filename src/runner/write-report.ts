@@ -19,6 +19,25 @@ export async function writeReportToDisk(report: BenchmarkReport): Promise<string
   await mkdir(dir, { recursive: true });
   await writeFile(join(dir, 'results.json'), renderJsonReport(report), 'utf8');
   await writeFile(join(dir, 'report.md'), renderMarkdownReport(report), 'utf8');
+
+  // Per-(adapter, fixture) extraction files for easy auditing of what each
+  // model produced. Useful for diffing against expected.json side-by-side.
+  const extractionsDir = join(dir, 'extractions');
+  await mkdir(extractionsDir, { recursive: true });
+  for (const row of report.rows) {
+    const payload = {
+      adapter: row.adapterName,
+      fixture: row.fixtureId,
+      status: row.status,
+      errorMessage: row.errorMessage,
+      metrics: row.metrics,
+      scores: row.scores,
+      extracted: row.extracted,
+    };
+    const filename = `${row.adapterName}--${row.fixtureId}.json`;
+    await writeFile(join(extractionsDir, filename), JSON.stringify(payload, null, 2), 'utf8');
+  }
+
   return dir;
 }
 

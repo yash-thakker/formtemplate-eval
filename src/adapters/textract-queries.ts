@@ -56,11 +56,12 @@ export const textractQueriesAdapter: ExtractionAdapter = {
         questionFields.push({
           _id: randomUUID(),
           fieldType: 'single-line',
-          fieldLabel: 'Label',
           questionValue,
           isMandatory: false,
-          fieldInstruction: answer,
         });
+        // Note: Textract Queries returns an answer text in the QUERY_RESULT
+        // block; not surfaced since we dropped fieldInstruction from the schema.
+        void answer;
       }
 
       const template = {
