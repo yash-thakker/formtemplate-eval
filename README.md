@@ -2,7 +2,7 @@
 
 Local benchmark / eval framework for comparing AI extraction pipelines on AEC (architecture / engineering / construction) form PDFs.
 
-Drop in blank-form PDFs and their ground-truth structured templates, point the CLI at them, and get a side-by-side scorecard of every pipeline — Gemini, Claude, GPT, AWS Textract (FORMS / TABLES / LAYOUT / SIGNATURES & QUERIES), Sarvam Document Intelligence, and combined OCR→LLM variants.
+Drop in blank-form PDFs and their ground-truth structured templates, point the CLI at them, and get a side-by-side scorecard of every pipeline — Gemini, Claude, GPT, Sarvam Document Intelligence, and combined OCR→LLM variants.
 
 > **Status:** local dev tool. Not for production. Output schema, prompts, and pricing are placeholders until calibrated.
 
@@ -43,10 +43,7 @@ pnpm eval compare reports/2026-05-28-150000 reports/2026-05-28-180000
 | `gemini-flash` | Google Gemini 2.5 Flash — PDF → structured template via Vercel AI SDK `generateObject`. |
 | `gemini-pro` | Same as above, Gemini 2.5 Pro. |
 | `claude-sonnet` | Anthropic Claude Sonnet 4.6, same path. |
-| `gpt5` | OpenAI GPT-5, same path. |
-| `textract-only` | AWS Textract FORMS + TABLES + LAYOUT + SIGNATURES. Block→template mapping, no LLM. |
-| `textract-queries` | AWS Textract Queries. Requires per-fixture queries in `meta.json`. |
-| `textract-plus-llm` | Textract OCR → Gemini Flash structuring. |
+| `gpt5` | OpenAI GPT-5 (Responses API, `reasoning_effort=minimal`), same path. |
 | `sarvam-only` | Sarvam Document Intelligence markdown → heuristic template (no LLM). |
 | `sarvam-plus-llm` | Sarvam markdown → Gemini Flash structuring. |
 
@@ -54,7 +51,7 @@ pnpm eval compare reports/2026-05-28-150000 reports/2026-05-28-180000
 
 1. Create `fixtures/<id>/` (e.g. `fixtures/001-aia-g702/`).
 2. Drop in `input.pdf` (the blank form) and `expected.json` (your ground-truth `ExtractedTemplate`).
-3. Copy `fixtures/_template/meta.json` to `fixtures/<id>/meta.json` and fill in id + name. Add `queries` if you intend to benchmark `textract-queries`.
+3. Copy `fixtures/_template/meta.json` to `fixtures/<id>/meta.json` and fill in id + name.
 4. `pnpm eval validate-fixture --id <id>` — confirms `expected.json` matches the Zod schema.
 5. `pnpm eval list` — confirms it's discovered.
 

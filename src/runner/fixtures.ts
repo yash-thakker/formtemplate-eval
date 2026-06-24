@@ -12,9 +12,6 @@ const MetaSchema = z.object({
   id: z.string(),
   name: z.string(),
   notes: z.string().optional(),
-  queries: z
-    .array(z.object({ alias: z.string(), text: z.string() }))
-    .optional(),
   language: z.string().optional(),
 });
 

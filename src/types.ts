@@ -32,7 +32,6 @@ export interface FixtureMeta {
   id: string;
   name: string;
   notes?: string;
-  queries?: Array<{ alias: string; text: string }>;
   language?: string;
 }
 
